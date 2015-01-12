@@ -1,0 +1,45 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- ############# Parent section ############# -->
+	<parent>
+		<groupId>org.geduino.ros</groupId>
+		<artifactId>ros</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<!-- ############# Main def section ############# -->
+	<groupId>org.geduino.ros</groupId>
+	<artifactId>tcpros</artifactId>
+	<packaging>jar</packaging>
+	<name>Geduino ROS TCPROS</name>
+	<description>Geduino TCPROS transport protocol server and client</description>
+
+	<!-- ############# Build section ############# -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<!-- ############# Dependencies section ############# -->
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.geduino.ros</groupId>
+			<artifactId>core</artifactId>
+		</dependency>
+	</dependencies>
+
+</project> 

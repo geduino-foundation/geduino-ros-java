@@ -1,0 +1,208 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- ############# Main def section ############# -->
+	<groupId>org.geduino.ros</groupId>
+	<artifactId>ros</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Geduino ROS</name>
+	<description>Geduino ROS library</description>
+
+	<!-- ############# Organization section ############# -->
+	<organization>
+		<name>Geduino Foundation</name>
+		<url>http://geduino.blogspot.it/</url>
+	</organization>
+	
+	<!-- ############# SCM section ############# -->
+	<scm>
+		<developerConnection>scm:git:https://github.com/afrancescon/geduino-ros.git</developerConnection> 
+		<tag>HEAD</tag>
+	</scm>
+
+	<!-- ############# Properties section ############## -->
+	<properties>
+	
+		<!-- ############# Must be the same of the one in the pom version ############# -->
+		<ros.parent.version>1.0.0-SNAPSHOT</ros.parent.version>
+		
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		
+	</properties>
+
+	<!-- ############# Developers section ############# -->
+	<developers>
+		<developer>
+			<name>Alessandro Francescon</name>
+			<email>alessandro.francescon@gmail.com</email>
+		</developer>
+	</developers>
+
+	<!-- ############# Build section ############# -->
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.3.1</version>
+					<executions>
+						<execution>
+							<id>enforce</id>
+							<configuration>
+								<rules>
+									<DependencyConvergence />
+								</rules>
+							</configuration>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-eclipse-plugin</artifactId>
+					<version>2.9</version>
+					<configuration>
+						<useProjectReferences>false</useProjectReferences>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.2</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.4</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.1</version>
+					<configuration>
+						<docfilessubdirs>true</docfilessubdirs>
+						<bottom>Copyright &#169; {currentYear} {organizationName}. All rights reserved.</bottom>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5.1</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-provider-gitexe</artifactId>
+							<version>1.9.2</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<!-- ############# Modules ############# -->
+	<modules>
+		<module>core</module>
+		<module>tcpros</module>
+		<module>xmlrpc</module>
+	</modules>
+
+	<!-- ############# Dependencies section ############# -->
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- JUnit -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>3.8</version>
+				<scope>test</scope>
+			</dependency>
+			
+			<!-- log4j -->
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.12</version>
+			</dependency>
+
+			<!--The jetty server -->
+			<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>8.1.7.v20120910</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>8.1.7.v20120910</version>
+		</dependency>
+		<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-jmx</artifactId>
+				<version>8.1.7.v20120910</version>
+			</dependency>
+
+<!-- The XML RPC client and server -->
+<dependency>
+			<groupId>org.apache.xmlrpc</groupId>
+			<artifactId>xmlrpc-client</artifactId>
+			<version>3.1.3.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlrpc</groupId>
+			<artifactId>xmlrpc-server</artifactId>
+			<version>3.1.3.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+			<!-- The modules -->
+			<dependency>
+				<groupId>org.geduino.ros</groupId>
+				<artifactId>core</artifactId>
+				<version>${ros.parent.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.geduino.ros</groupId>
+				<artifactId>tcpros</artifactId>
+				<version>${ros.parent.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.geduino.ros</groupId>
+				<artifactId>xmlrpc</artifactId>
+				<version>${ros.parent.version}</version>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+</project>
