@@ -1,10 +1,10 @@
 package org.geduino.ros.core.api;
 
-
 import java.net.URI;
 import java.util.Set;
 
 import org.geduino.ros.core.api.exception.RosApiException;
+import org.geduino.ros.core.naming.model.GlobalName;
 
 public interface ParameterServerAPI {
 
@@ -18,7 +18,8 @@ public interface ParameterServerAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	void deleteParam(String callerId, String key) throws RosApiException;
+	void deleteParam(GlobalName callerId, GlobalName key)
+			throws RosApiException;
 
 	/**
 	 * Set parameter. Furthermore, it will replace all existing parameters in
@@ -34,7 +35,7 @@ public interface ParameterServerAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	void setParam(String callerId, String key, Object value)
+	void setParam(GlobalName callerId, GlobalName key, Object value)
 			throws RosApiException;
 
 	/**
@@ -48,7 +49,7 @@ public interface ParameterServerAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Object getParam(String callerId, String key) throws RosApiException;
+	Object getParam(GlobalName callerId, GlobalName key) throws RosApiException;
 
 	/**
 	 * Search for parameter key on the Parameter Server. Search starts in
@@ -75,7 +76,8 @@ public interface ParameterServerAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Set<String> searchParam(String callerId, String key) throws RosApiException;
+	Set<GlobalName> searchParam(GlobalName callerId, String key)
+			throws RosApiException;
 
 	/**
 	 * Retrieve parameter value from server and subscribe to updates to that
@@ -91,7 +93,7 @@ public interface ParameterServerAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Object subscribeParam(String callerId, URI callerApi, String key)
+	Object subscribeParam(GlobalName callerId, URI callerApi, GlobalName key)
 			throws RosApiException;
 
 	/**
@@ -108,7 +110,7 @@ public interface ParameterServerAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	int unsubscribeParam(String callerId, URI callerApi, String key)
+	int unsubscribeParam(GlobalName callerId, URI callerApi, GlobalName key)
 			throws RosApiException;
 
 	/**
@@ -122,7 +124,8 @@ public interface ParameterServerAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	boolean hasParam(String callerId, String key) throws RosApiException;
+	boolean hasParam(GlobalName callerId, GlobalName key)
+			throws RosApiException;
 
 	/**
 	 * Get list of all parameter names stored on this server.
@@ -133,6 +136,6 @@ public interface ParameterServerAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Set<String> getParamNames(String callerId) throws RosApiException;
-	
+	Set<GlobalName> getParamNames(GlobalName callerId) throws RosApiException;
+
 }

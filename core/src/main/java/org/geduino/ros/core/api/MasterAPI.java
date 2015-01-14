@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.geduino.ros.core.api.exception.RosApiException;
 import org.geduino.ros.core.api.model.SystemState;
+import org.geduino.ros.core.naming.model.GlobalName;
+import org.geduino.ros.core.naming.model.MessageName;
 
 public interface MasterAPI {
 
@@ -17,7 +19,7 @@ public interface MasterAPI {
 	 * @param callerId
 	 *            ROS caller ID
 	 * @param service
-	 *            Fully-qualified name of service
+	 *            Name of service
 	 * @param serviceApi
 	 *            ROSRPC Service URI
 	 * @param callerApi
@@ -25,7 +27,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	void registerService(String callerId, String service, URI serviceApi,
+	void registerService(GlobalName callerId, GlobalName service, URI serviceApi,
 			URI callerApi) throws RosApiException;
 
 	/**
@@ -34,7 +36,7 @@ public interface MasterAPI {
 	 * @param callerId
 	 *            ROS caller ID
 	 * @param service
-	 *            Fully-qualified name of service
+	 *            Name of service
 	 * @param serviceApi
 	 *            API URI of service to unregister. Unregistration will only
 	 *            occur if current registration matches.
@@ -44,7 +46,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	int unregisterService(String callerId, String service, URI serviceApi)
+	int unregisterService(GlobalName callerId, GlobalName service, URI serviceApi)
 			throws RosApiException;
 
 	/**
@@ -55,10 +57,9 @@ public interface MasterAPI {
 	 * @param callerId
 	 *            ROS caller ID
 	 * @param topic
-	 *            Fully-qualified name of topic
+	 *            Name of topic
 	 * @param topicType
-	 *            Datatype for topic. Must be a package-resource name, i.e. the
-	 *            .msg name.
+	 *            Datatype for topic.
 	 * @param callerApi
 	 *            API URI of subscriber to register. Will be used for new
 	 *            publisher notifications.
@@ -67,8 +68,8 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Set<URI> registerSubscriber(String callerId, String topic,
-			String topicType, URI callerApi) throws RosApiException;
+	Set<URI> registerSubscriber(GlobalName callerId, GlobalName topic,
+			MessageName topicType, URI callerApi) throws RosApiException;
 
 	/**
 	 * Unregister the caller as a subscriber of the topic.
@@ -76,7 +77,7 @@ public interface MasterAPI {
 	 * @param callerId
 	 *            ROS caller ID
 	 * @param topic
-	 *            Fully-qualified name of topic
+	 *            Name of topic
 	 * @param callerApi
 	 *            API URI of service to unregister. Unregistration will only
 	 *            occur if current registration matches.
@@ -86,7 +87,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	int unregisterSubscriber(String callerId, String topic, URI callerApi)
+	int unregisterSubscriber(GlobalName callerId, GlobalName topic, URI callerApi)
 			throws RosApiException;
 
 	/**
@@ -95,18 +96,17 @@ public interface MasterAPI {
 	 * @param callerId
 	 *            ROS caller ID
 	 * @param topic
-	 *            Fully-qualified name of topic
+	 *            Name of topic
 	 * @param topicType
-	 *            Datatype for topic. Must be a package-resource name, i.e. the
-	 *            .msg name.
+	 *            Datatype for topic.
 	 * @param callerApi
 	 *            API URI of publisher to register.
 	 * @return List of current subscribers of topic in the form of URIs.
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Set<URI> registerPublisher(String callerId, String topic,
-			String topicType, URI callerApi) throws RosApiException;
+	Set<URI> registerPublisher(GlobalName callerId, GlobalName topic,
+			MessageName topicType, URI callerApi) throws RosApiException;
 
 	/**
 	 * Unregister the caller as a publisher of the topic.
@@ -114,7 +114,7 @@ public interface MasterAPI {
 	 * @param callerId
 	 *            ROS caller ID
 	 * @param topic
-	 *            Fully-qualified name of topic
+	 *            Name of topic
 	 * @param callerApi
 	 *            API URI of publisher to unregister. Unregistration will only
 	 *            occur if current registration matches.
@@ -124,7 +124,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	int unregisterPublisher(String callerId, String topic, URI callerApi)
+	int unregisterPublisher(GlobalName callerId, GlobalName topic, URI callerApi)
 			throws RosApiException;
 
 	/**
@@ -140,7 +140,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	URI lookupNode(String callerId, String nodeName) throws RosApiException;
+	URI lookupNode(GlobalName callerId, GlobalName nodeName) throws RosApiException;
 
 	/**
 	 * Get list of topics that can be subscribed to. This does not return topics
@@ -157,7 +157,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Map<String, String> getPublishedTopics(String callerId, String subgraph)
+	Map<GlobalName, MessageName> getPublishedTopics(GlobalName callerId, String subgraph)
 			throws RosApiException;
 
 	/**
@@ -169,7 +169,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Map<String, String> getTopicTypes(String callerId) throws RosApiException;
+	Map<GlobalName, MessageName> getTopicTypes(GlobalName callerId) throws RosApiException;
 
 	/**
 	 * Retrieve list representation of system state (i.e. publishers,
@@ -181,7 +181,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	SystemState getSystemState(String callerId) throws RosApiException;
+	SystemState getSystemState(GlobalName callerId) throws RosApiException;
 
 	/**
 	 * Get the URI of the master.
@@ -192,7 +192,7 @@ public interface MasterAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	URI getUri(String callerId) throws RosApiException;
+	URI getUri(GlobalName callerId) throws RosApiException;
 
 	/**
 	 * Lookup all provider of a particular service.
@@ -200,12 +200,12 @@ public interface MasterAPI {
 	 * @param callerId
 	 *            ROS caller ID
 	 * @param service
-	 *            Fully-qualified name of service
+	 *           Name of service
 	 * @return Service URL is provides address and port of the service. Fails if
 	 *         there is no provider.
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	URL lookupService(String callerId, String service) throws RosApiException;
+	URL lookupService(GlobalName callerId, GlobalName service) throws RosApiException;
 
 }

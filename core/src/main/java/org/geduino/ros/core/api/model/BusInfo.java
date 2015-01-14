@@ -3,6 +3,8 @@ package org.geduino.ros.core.api.model;
 import java.io.Serializable;
 import java.net.URI;
 
+import org.geduino.ros.core.naming.model.GlobalName;
+
 public class BusInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -11,11 +13,11 @@ public class BusInfo implements Serializable {
 	private final URI destinationId;
 	private final Direction direction;
 	private final Transport transport;
-	private final String topicName;
+	private final GlobalName topicName;
 	private final boolean connected;
 
 	public BusInfo(String connectionId, URI destinationId, Direction direction,
-			Transport transport, String topicName, boolean connected) {
+			Transport transport, GlobalName topicName, boolean connected) {
 
 		this.connectionId = connectionId;
 		this.destinationId = destinationId;
@@ -42,7 +44,7 @@ public class BusInfo implements Serializable {
 		return transport;
 	}
 
-	public String getTopicName() {
+	public GlobalName getTopicName() {
 		return topicName;
 	}
 

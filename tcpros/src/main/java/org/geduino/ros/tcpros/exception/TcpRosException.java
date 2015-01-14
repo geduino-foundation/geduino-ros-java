@@ -1,8 +1,8 @@
 package org.geduino.ros.tcpros.exception;
 
-import org.geduino.ros.core.exception.RosException;
+import org.geduino.ros.core.transport.exception.RosTransportException;
 
-public class TcpRosException extends RosException {
+public class TcpRosException extends RosTransportException {
 
 	private static final long serialVersionUID = 1L;
 

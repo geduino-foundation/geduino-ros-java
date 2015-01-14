@@ -1,28 +1,31 @@
 package org.geduino.ros.tcpros.server;
 
-
 import org.apache.log4j.Logger;
+import org.geduino.ros.core.messages.model.Message;
+import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.tcpros.server.exception.TcpRosServerException;
 
-public class TcpRosServer {
+public class TcpRosServer<T extends Message, K extends Message> {
 
 	private static final Logger LOGGER = Logger.getLogger(TcpRosServer.class);
 
-	private final String callerId;
-	private final TcpRosServerConfig tcpRosServerConfig;
+	private final GlobalName callerId;
+	private final TcpRosServerConfig<T, K> tcpRosServerConfig;
 
-	private TcpRosServerThread tcpRosServerThread;
+	private TcpRosServerThread<T, K> tcpRosServerThread;
+	
+	private int effectivePort;
 
-	public TcpRosServer(String callerId) {
+	public TcpRosServer(GlobalName callerId) {
 		this.callerId = callerId;
-		this.tcpRosServerConfig = new TcpRosServerConfig();
+		this.tcpRosServerConfig = new TcpRosServerConfig<T, K>();
 	}
 
-	public String getCallerId() {
+	public GlobalName getCallerId() {
 		return callerId;
 	}
 
-	public TcpRosServerConfig getTcpRosServerConfig() {
+	public TcpRosServerConfig<T, K> getTcpRosServerConfig() {
 		return tcpRosServerConfig;
 	}
 
@@ -31,11 +34,14 @@ public class TcpRosServer {
 		if (tcpRosServerThread == null) {
 
 			// Create tcp ros server runnable
-			TcpRosServerRunnable tcpRosServerRunnable = new TcpRosServerRunnable(
+			TcpRosServerRunnable<T, K> tcpRosServerRunnable = new TcpRosServerRunnable<T, K>(
 					callerId, tcpRosServerConfig);
+			
+			// Get effective port
+			effectivePort = tcpRosServerRunnable.getPort();
 
 			// Create tcp ros server thread
-			tcpRosServerThread = new TcpRosServerThread(tcpRosServerRunnable);
+			tcpRosServerThread = new TcpRosServerThread<T, K>(tcpRosServerRunnable);
 
 			// Log
 			LOGGER.trace("starting tcpros server thread...");
@@ -45,7 +51,7 @@ public class TcpRosServer {
 
 			// Log
 			LOGGER.debug("tcpros server started on port: "
-					+ tcpRosServerConfig.getPort());
+					+ effectivePort);
 
 		} else {
 
@@ -54,6 +60,10 @@ public class TcpRosServer {
 
 		}
 
+	}
+	
+	public int getEffectivePort() {
+		return effectivePort;
 	}
 
 	public synchronized void stop() {

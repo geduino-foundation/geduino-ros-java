@@ -13,8 +13,8 @@
 	<groupId>org.geduino.ros</groupId>
 	<artifactId>core</artifactId>
 	<packaging>jar</packaging>
-	<name>Geduino ROS CORE</name>
-	<description>Geduino ROS API and transport protocol definition</description>
+	<name>Geduino ROS Core</name>
+	<description>Geduino ROS Core</description>
 
 	<!-- ############# Build section ############# -->
 	<build>

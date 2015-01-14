@@ -1,6 +1,5 @@
 package org.geduino.ros.core.api;
 
-
 import java.net.URI;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +8,9 @@ import org.geduino.ros.core.api.exception.RosApiException;
 import org.geduino.ros.core.api.model.BusInfo;
 import org.geduino.ros.core.api.model.BusStats;
 import org.geduino.ros.core.api.model.Protocol;
+import org.geduino.ros.core.api.model.ProtocolType;
+import org.geduino.ros.core.naming.model.GlobalName;
+import org.geduino.ros.core.naming.model.MessageName;
 
 public interface SlaveAPI {
 
@@ -21,7 +23,7 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	BusStats getBusStats(String callerId) throws RosApiException;
+	BusStats getBusStats(GlobalName callerId) throws RosApiException;
 
 	/**
 	 * Retrieve transport/topic connection information.
@@ -32,7 +34,7 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Set<BusInfo> getBusInfo(String callerId) throws RosApiException;
+	Set<BusInfo> getBusInfo(GlobalName callerId) throws RosApiException;
 
 	/**
 	 * Get the URI of the master node.
@@ -43,7 +45,7 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	URI getMasterUri(String callerId) throws RosApiException;
+	URI getMasterUri(GlobalName callerId) throws RosApiException;
 
 	/**
 	 * Stop this server.
@@ -55,7 +57,7 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	void shutdown(String callerId, String message) throws RosApiException;
+	void shutdown(GlobalName callerId, String message) throws RosApiException;
 
 	/**
 	 * Get the PID of this server.
@@ -66,7 +68,7 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	int getPid(String callerId) throws RosApiException;
+	int getPid(GlobalName callerId) throws RosApiException;
 
 	/**
 	 * Retrieve a list of topics that this node subscribes to.
@@ -77,7 +79,7 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Map<String, String> getSubscriptions(String callerId)
+	Map<GlobalName, MessageName> getSubscriptions(GlobalName callerId)
 			throws RosApiException;
 
 	/**
@@ -89,7 +91,8 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Map<String, String> getPublications(String callerId) throws RosApiException;
+	Map<GlobalName, MessageName> getPublications(GlobalName callerId)
+			throws RosApiException;
 
 	/**
 	 * Callback from master with updated value of subscribed parameter.
@@ -103,8 +106,8 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	void paramUpdate(String callerId, String parameterKey, Object parameterValue)
-			throws RosApiException;
+	void paramUpdate(GlobalName callerId, GlobalName parameterKey,
+			Object parameterValue) throws RosApiException;
 
 	/**
 	 * Callback from master of current publisher list for specified topic.
@@ -118,8 +121,8 @@ public interface SlaveAPI {
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	void publisherUpdate(String callerId, String topic, Set<URI> publishers)
-			throws RosApiException;
+	void publisherUpdate(GlobalName callerId, GlobalName topic,
+			Set<URI> publishers) throws RosApiException;
 
 	/**
 	 * Publisher node API method called by a subscriber node. This requests that
@@ -133,14 +136,14 @@ public interface SlaveAPI {
 	 *            ROS caller ID.
 	 * @param topic
 	 *            Topic name.
-	 * @param protocols
+	 * @param protocolTypes
 	 *            List of desired protocols for communication in order of
 	 *            preference.
 	 * @return Selected protocol
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Protocol requestTopic(String callerId, String topic,
-			Set<Protocol> protocols) throws RosApiException;
+	Protocol requestTopic(GlobalName callerId, GlobalName topic,
+			Set<ProtocolType> protocolTypes) throws RosApiException;
 
 }

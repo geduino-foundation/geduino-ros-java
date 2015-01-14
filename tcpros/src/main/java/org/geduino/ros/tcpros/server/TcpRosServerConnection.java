@@ -1,6 +1,5 @@
 package org.geduino.ros.tcpros.server;
 
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -9,20 +8,23 @@ import java.net.URI;
 import org.apache.log4j.Logger;
 import org.geduino.ros.core.api.model.BusInfo;
 import org.geduino.ros.core.api.model.Direction;
-import org.geduino.ros.core.api.model.Message;
 import org.geduino.ros.core.api.model.PublisherConnectionData;
 import org.geduino.ros.core.api.model.Transport;
-import org.geduino.ros.core.exception.NotYetImplementedException;
 import org.geduino.ros.core.exception.RosRuntimeException;
-import org.geduino.ros.core.transport.PublisherConnection;
-import org.geduino.ros.core.transport.ServiceConnection;
+import org.geduino.ros.core.messages.model.Message;
+import org.geduino.ros.core.naming.model.GlobalName;
+import org.geduino.ros.core.naming.model.Name;
+import org.geduino.ros.core.transport.model.MessageReader;
+import org.geduino.ros.core.transport.model.MessageWriter;
+import org.geduino.ros.core.transport.model.PublisherConnection;
+import org.geduino.ros.core.transport.model.ServiceConnection;
 import org.geduino.ros.tcpros.TcpRosConnection;
 import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
 import org.geduino.ros.tcpros.model.ConnectionHeader;
 
-public class TcpRosServerConnection extends TcpRosConnection implements
-		PublisherConnection, ServiceConnection {
+public class TcpRosServerConnection<T extends Message, K extends Message> extends TcpRosConnection implements
+		PublisherConnection<K>, ServiceConnection<T, K> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(TcpRosServerConnection.class);
@@ -30,7 +32,7 @@ public class TcpRosServerConnection extends TcpRosConnection implements
 	private ConnectionHeader subscriberConnectionHeader;
 	private ConnectionHeader publisherConnectionHeader;
 
-	public TcpRosServerConnection(String callerdId, Socket socket)
+	public TcpRosServerConnection(GlobalName callerdId, Socket socket)
 			throws TcpRosException, IOException {
 		super(callerdId, socket);
 	}
@@ -96,9 +98,12 @@ public class TcpRosServerConnection extends TcpRosConnection implements
 			URI destinationId = getDestinationId();
 			Direction direction = getDirection();
 			Transport transport = getTransport();
-			String topicName = getSubscriberConnectionHeader().get(
+			String topicNameString = getSubscriberConnectionHeader().get(
 					ConnectionHeader.TOPIC);
 			boolean connected = isConnected();
+
+			// Get topic name
+			GlobalName topicName = (GlobalName) Name.parseName(topicNameString);
 
 			// Create bus info
 			BusInfo busInfo = new BusInfo(connectionId, destinationId,
@@ -121,7 +126,7 @@ public class TcpRosServerConnection extends TcpRosConnection implements
 
 		if (isPublisherConnection()) {
 
-			// Get bus info data
+			// Get publisher connection data
 			String connectionId = getConnectionId();
 			int byteSent = getByteSent();
 			int numSent = getNumSent();
@@ -189,35 +194,6 @@ public class TcpRosServerConnection extends TcpRosConnection implements
 
 	}
 
-	@Override
-	public Message readMessage() throws IOException {
-
-		if (isServiceConnection()) {
-
-			throw new NotYetImplementedException();
-
-		} else {
-
-			// Throw exception
-			throw new RosRuntimeException(
-					"message cannot be read for non service connection");
-
-		}
-
-	}
-
-	@Override
-	public void writeMessage(Message message) throws IOException {
-	
-		// Just a test
-		String test = "Hello world!";
-		
-		writeLittleEndian(test.length() + 4);
-		writeLittleEndian(test.length());
-		writeString(test);
-		
-	}
-
 	private void handshakeTopicConnection() throws TcpRosHandshakeException,
 			IOException {
 
@@ -251,8 +227,8 @@ public class TcpRosServerConnection extends TcpRosConnection implements
 
 		// Create publisher connection header
 		publisherConnectionHeader = new ConnectionHeader();
-		publisherConnectionHeader
-				.put(ConnectionHeader.CALLER_ID, getCallerId());
+		publisherConnectionHeader.put(ConnectionHeader.CALLER_ID, getCallerId()
+				.toString());
 		publisherConnectionHeader.put(ConnectionHeader.MD5_SUM, md5sum);
 		publisherConnectionHeader.put(ConnectionHeader.TYPE, type);
 		publisherConnectionHeader.put(ConnectionHeader.LATCHING, "1");
@@ -273,8 +249,8 @@ public class TcpRosServerConnection extends TcpRosConnection implements
 
 		// Create publisher connection header
 		publisherConnectionHeader = new ConnectionHeader();
-		publisherConnectionHeader
-				.put(ConnectionHeader.CALLER_ID, getCallerId());
+		publisherConnectionHeader.put(ConnectionHeader.CALLER_ID, getCallerId()
+				.toString());
 
 		// Write publisher connection header
 		write(publisherConnectionHeader);
@@ -310,6 +286,18 @@ public class TcpRosServerConnection extends TcpRosConnection implements
 
 		return stringBuffer.toString();
 
+	}
+
+	@Override
+	public MessageReader<T> getMessageReader() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MessageWriter<K> getMessageWriter() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

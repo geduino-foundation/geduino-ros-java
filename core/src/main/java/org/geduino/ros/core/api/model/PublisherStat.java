@@ -4,16 +4,18 @@ package org.geduino.ros.core.api.model;
 import java.io.Serializable;
 import java.util.Set;
 
+import org.geduino.ros.core.naming.model.GlobalName;
+
 
 public class PublisherStat implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String topicName;
+	private final GlobalName topicName;
 	private final int messageDataSent;
 	private final Set<PublisherConnectionData> publisherConnectionDatas;
 
-	public PublisherStat(String topicName, int messageDataSent,
+	public PublisherStat(GlobalName topicName, int messageDataSent,
 			Set<PublisherConnectionData> publisherConnectionDatas) {
 
 		this.topicName = topicName;
@@ -22,7 +24,7 @@ public class PublisherStat implements Serializable {
 
 	}
 
-	public String getTopicName() {
+	public GlobalName getTopicName() {
 		return topicName;
 	}
 

@@ -1,28 +1,26 @@
 package org.geduino.ros.tcpros.server;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.geduino.ros.core.transport.ConnectionListener;
+import org.geduino.ros.core.messages.model.Message;
+import org.geduino.ros.core.transport.model.ConnectionListener;
 
-public class TcpRosServerConfig {
+public class TcpRosServerConfig<T extends Message, K extends Message> {
 
 	private int port;
 	private int backlog;
-	private int threadPoolSize;
 
-	private final List<ConnectionListener> connectionListeners;
+	private final List<ConnectionListener<T, K>> connectionListeners;
 
 	public TcpRosServerConfig() {
 
 		// Set default value
-		port = 11322;
-		backlog = 50;
-		threadPoolSize = 50;
+		port = 0;
+		backlog = 1;
 
-		connectionListeners = new ArrayList<ConnectionListener>();
+		connectionListeners = new ArrayList<ConnectionListener<T, K>>();
 
 	}
 
@@ -42,20 +40,12 @@ public class TcpRosServerConfig {
 		this.backlog = backlog;
 	}
 
-	public int getThreadPoolSize() {
-		return threadPoolSize;
-	}
-
-	public void setThreadPoolSize(int threadPoolSize) {
-		this.threadPoolSize = threadPoolSize;
-	}
-
-	public void addConnectionListener(ConnectionListener connectionListener) {
+	public void addConnectionListener(ConnectionListener<T, K> connectionListener) {
 		connectionListeners.add(connectionListener);
 	}
 
 	public boolean removeConnectionListener(
-			ConnectionListener connectionListener) {
+			ConnectionListener<T, K> connectionListener) {
 		return connectionListeners.remove(connectionListener);
 	}
 
@@ -63,10 +53,10 @@ public class TcpRosServerConfig {
 		connectionListeners.clear();
 	}
 
-	public List<ConnectionListener> getConnectionListeners() {
+	public List<ConnectionListener<T, K>> getConnectionListeners() {
 
 		// Create unmodifiable copy of connection listeners
-		List<ConnectionListener> unmodifiableConnectionListeners = Collections
+		List<ConnectionListener<T, K>> unmodifiableConnectionListeners = Collections
 				.unmodifiableList(connectionListeners);
 
 		return unmodifiableConnectionListeners;

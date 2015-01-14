@@ -12,7 +12,8 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.geduino.ros.core.api.model.Direction;
 import org.geduino.ros.core.api.model.Transport;
-import org.geduino.ros.core.transport.SocketConnection;
+import org.geduino.ros.core.naming.model.GlobalName;
+import org.geduino.ros.core.transport.model.SocketConnection;
 import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
 import org.geduino.ros.tcpros.exception.TcpRosHeaderSerializationException;
@@ -25,10 +26,10 @@ public abstract class TcpRosConnection extends SocketConnection {
 	private static final Logger LOGGER = Logger
 			.getLogger(TcpRosConnection.class);
 
-	private final String callerId;
+	private final GlobalName callerId;
 	private final URI destinationId;
 
-	public TcpRosConnection(String callerId, Socket socket)
+	public TcpRosConnection(GlobalName callerId, Socket socket)
 			throws TcpRosException, IOException {
 
 		super(socket);
@@ -56,11 +57,12 @@ public abstract class TcpRosConnection extends SocketConnection {
 		// Log
 		LOGGER.trace("performing handshake...");
 
+		// Handshake
 		handshake();
 
 	}
 
-	public String getCallerId() {
+	public GlobalName getCallerId() {
 		return callerId;
 	}
 
@@ -77,6 +79,54 @@ public abstract class TcpRosConnection extends SocketConnection {
 	@Override
 	public Transport getTransport() {
 		return Transport.TCPROS;
+	}
+	
+	public int readLittleEndian() throws IOException {
+
+		byte[] bytes = new byte[4];
+
+		// Read bytes
+		read(bytes, 4);
+
+		// Get integer
+		int integer = LittleEndianUtil.toLittleEndianInt(bytes);
+
+		return integer;
+
+	}
+
+	public String readString(int length) throws IOException {
+
+		byte[] bytes = new byte[length];
+
+		// Read bytes
+		read(bytes, length);
+
+		// Get string
+		String string = new String(bytes);
+
+		return string;
+
+	}
+
+	public void writeLittleEndian(int integer) throws IOException {
+
+		// Get little endian bytes
+		byte[] bytes = LittleEndianUtil.toLittleEndianBytes(integer);
+
+		// Write bytes
+		write(bytes);
+
+	}
+
+	public void writeString(String string) throws IOException {
+
+		// Get bytes
+		byte[] bytes = string.getBytes();
+
+		// Write bytes
+		write(bytes);
+
 	}
 
 	public abstract ConnectionHeader getPublisherConnectionHeader();
@@ -233,54 +283,6 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("wrote " + wroteBytes + " of " + totalHeaderLength);
 
 		}
-
-	}
-
-	protected int readLittleEndian() throws IOException {
-
-		byte[] bytes = new byte[4];
-
-		// Read bytes
-		read(bytes, 4);
-
-		// Get integer
-		int integer = LittleEndianUtil.toLittleEndianInt(bytes);
-
-		return integer;
-
-	}
-
-	protected String readString(int length) throws IOException {
-
-		byte[] bytes = new byte[length];
-
-		// Read bytes
-		read(bytes, length);
-
-		// Get string
-		String string = new String(bytes);
-
-		return string;
-
-	}
-
-	protected void writeLittleEndian(int integer) throws IOException {
-
-		// Get little endian bytes
-		byte[] bytes = LittleEndianUtil.toLittleEndianBytes(integer);
-
-		// Write bytes
-		write(bytes);
-
-	}
-
-	protected void writeString(String string) throws IOException {
-
-		// Get bytes
-		byte[] bytes = string.getBytes();
-
-		// Write bytes
-		write(bytes);
 
 	}
 

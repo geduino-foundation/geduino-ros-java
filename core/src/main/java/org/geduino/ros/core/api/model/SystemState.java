@@ -1,21 +1,24 @@
 package org.geduino.ros.core.api.model;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.geduino.ros.core.naming.model.GlobalName;
 
 public class SystemState implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Map<String, Set<String>> publishers;
-	private final Map<String, Set<String>> subscribers;
-	private final Map<String, Set<String>> services;
+	private final Map<GlobalName, Set<URI>> publishers;
+	private final Map<GlobalName, Set<URI>> subscribers;
+	private final Map<GlobalName, Set<URI>> services;
 
-	public SystemState(Map<String, Set<String>> publishers,
-			Map<String, Set<String>> subscribers,
-			Map<String, Set<String>> services) {
+	public SystemState(Map<GlobalName, Set<URI>> publishers,
+			Map<GlobalName, Set<URI>> subscribers,
+			Map<GlobalName, Set<URI>> services) {
 
 		this.publishers = publishers;
 		this.subscribers = subscribers;
@@ -23,19 +26,19 @@ public class SystemState implements Serializable {
 
 	}
 
-	public Map<String, Set<String>> getPublishers() {
+	public Map<GlobalName, Set<URI>> getPublishers() {
 		return publishers;
 	}
 
-	public Set<String> getPublishers(String topic) {
+	public Set<URI> getPublisher(String topic) {
 
 		// Get publishers
-		Set<String> result = publishers.get(topic);
+		Set<URI> result = publishers.get(topic);
 
 		if (result == null) {
 
 			// Set result to empty set
-			result = new HashSet<String>();
+			result = new HashSet<URI>();
 
 		}
 
@@ -43,19 +46,19 @@ public class SystemState implements Serializable {
 
 	}
 
-	public Map<String, Set<String>> getSubscribers() {
+	public Map<GlobalName, Set<URI>> getSubscribers() {
 		return subscribers;
 	}
 
-	public Set<String> getSubscribers(String topic) {
+	public Set<URI> getSubscriber(String topic) {
 
 		// Get subscribers
-		Set<String> result = subscribers.get(topic);
+		Set<URI> result = subscribers.get(topic);
 
 		if (result == null) {
 
 			// Set result to empty set
-			result = new HashSet<String>();
+			result = new HashSet<URI>();
 
 		}
 
@@ -63,19 +66,19 @@ public class SystemState implements Serializable {
 
 	}
 
-	public Map<String, Set<String>> getServices() {
+	public Map<GlobalName, Set<URI>> getServices() {
 		return services;
 	}
 
-	public Set<String> getServices(String service) {
+	public Set<URI> getService(String service) {
 
 		// Get services
-		Set<String> result = services.get(service);
+		Set<URI> result = services.get(service);
 
 		if (result == null) {
 
 			// Set result to empty set
-			result = new HashSet<String>();
+			result = new HashSet<URI>();
 
 		}
 

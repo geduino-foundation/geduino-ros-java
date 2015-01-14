@@ -129,6 +129,8 @@
 		<module>core</module>
 		<module>tcpros</module>
 		<module>xmlrpc</module>
+		<module>messages</module>
+		<module>node</module>
 	</modules>
 
 	<!-- ############# Dependencies section ############# -->
@@ -199,6 +201,16 @@
 			<dependency>
 				<groupId>org.geduino.ros</groupId>
 				<artifactId>xmlrpc</artifactId>
+				<version>${ros.parent.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.geduino.ros</groupId>
+				<artifactId>messages</artifactId>
+				<version>${ros.parent.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.geduino.ros</groupId>
+				<artifactId>node</artifactId>
 				<version>${ros.parent.version}</version>
 			</dependency>
 
