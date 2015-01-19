@@ -10,6 +10,8 @@ public interface Connection {
 
 	Protocol getConnectionProtocol();
 
+	boolean isClosed();
+	
 	void close() throws IOException;
 
 }

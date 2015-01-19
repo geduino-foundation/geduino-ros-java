@@ -60,7 +60,7 @@ public abstract class SocketConnection implements Connection {
 	public boolean isConnected() {
 
 		// Get is connected
-		boolean connected = socket.isConnected();
+		boolean connected = !socket.isConnected();
 
 		return connected;
 
@@ -112,6 +112,11 @@ public abstract class SocketConnection implements Connection {
 	@Override
 	public String getConnectionId() {
 		return id;
+	}
+	
+	@Override
+	public boolean isClosed() {
+		return socket.isClosed();
 	}
 
 	@Override

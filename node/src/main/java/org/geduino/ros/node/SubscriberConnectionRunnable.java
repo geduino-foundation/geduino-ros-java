@@ -27,7 +27,7 @@ class SubscriberConnectionRunnable<T extends Message> implements Runnable {
 		LOGGER.trace("starting subscriber connection thread for: "
 				+ subscriberConnection);
 
-		while (subscriberConnection.getBusInfo().isConnected()) {
+		while (!subscriberConnection.isClosed()) {
 
 			try {
 
