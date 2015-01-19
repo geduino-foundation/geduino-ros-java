@@ -156,6 +156,18 @@ public class TcpRosServerConnection<T extends Message, K extends Message>
 		}
 
 	}
+	
+	@Override
+	public MessageReader<T> getMessageReader() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MessageWriter<K> getMessageWriter() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	protected void handshake() throws TcpRosHandshakeException, IOException {
@@ -171,33 +183,55 @@ public class TcpRosServerConnection<T extends Message, K extends Message>
 		String service = subscriberConnectionHeader
 				.get(ConnectionHeader.SERVICE);
 
-		if (topic != null && service == null) {
+		try {
 
-			// Log
-			LOGGER.trace("handshake topic connection...");
+			if (topic != null && service == null) {
 
-			// Handshake topic connection
-			handshakeTopicConnection();
+				// Log
+				LOGGER.trace("handshake topic connection...");
 
-		} else if (topic == null && service != null) {
+				// Handshake topic connection
+				handshakeTopicConnection();
 
-			// Log
-			LOGGER.trace("handshake service connection...");
+			} else if (topic == null && service != null) {
 
-			// Handshake service connection
-			handshakeServiceConnection();
+				// Log
+				LOGGER.trace("handshake service connection...");
 
-		} else if (topic != null && service != null) {
+				// Handshake service connection
+				handshakeServiceConnection();
 
-			// Throw exception
-			throw new TcpRosHandshakeException(
-					"topic and service fields cannot be both not null");
+			} else if (topic != null && service != null) {
 
-		} else {
+				// Throw exception
+				throw new TcpRosHandshakeException(
+						"topic and service fields cannot be both not null");
 
-			// Throw exception
-			throw new TcpRosHandshakeException(
-					"one between topic and service fields must be not null");
+			} else {
+
+				// Throw exception
+				throw new TcpRosHandshakeException(
+						"one between topic and service fields must be not null");
+
+			}
+
+		} catch (TcpRosHandshakeException ex) {
+
+			try {
+
+				// Handle failed handshake
+				handleFailedHandshake(ex);
+
+			} catch (IOException ex2) {
+
+				// Log
+				LOGGER.error("could not notify handshake error to destination",
+						ex);
+
+			}
+
+			// Throw original exception
+			throw ex;
 
 		}
 
@@ -266,6 +300,18 @@ public class TcpRosServerConnection<T extends Message, K extends Message>
 
 	}
 
+	private void handleFailedHandshake(TcpRosHandshakeException ex)
+			throws IOException {
+
+		// Create publisher connection header
+		publisherConnectionHeader = new ConnectionHeader();
+		publisherConnectionHeader.put(ConnectionHeader.ERROR, ex.getMessage());
+
+		// Write publisher connection header
+		write(publisherConnectionHeader);
+
+	}
+
 	@Override
 	public String toString() {
 
@@ -295,18 +341,6 @@ public class TcpRosServerConnection<T extends Message, K extends Message>
 
 		return stringBuffer.toString();
 
-	}
-
-	@Override
-	public MessageReader<T> getMessageReader() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public MessageWriter<K> getMessageWriter() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

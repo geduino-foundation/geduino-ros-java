@@ -118,6 +118,17 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 		// Read connection header
 		publisherConnectionHeader = readConnectionHeader();
 
+		if (publisherConnectionHeader.containsKey(ConnectionHeader.ERROR)) {
+
+			// Get error
+			String error = publisherConnectionHeader
+					.get(ConnectionHeader.ERROR);
+
+			// Throw exception
+			throw new TcpRosHandshakeException(error);
+
+		}
+
 		// Read connection header data
 		String md5sum = getMandatoryField(publisherConnectionHeader,
 				ConnectionHeader.MD5_SUM);
@@ -147,16 +158,38 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 		return new MessageReader<T>() {
 
 			@Override
-			public T read() throws RosTransportSerializationException {
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException ex) {
-					ex.printStackTrace();
+			public T read() throws IOException,
+					RosTransportSerializationException {
+
+				byte[] b = new byte[128];
+				int l = -1;
+
+				while ((l = TcpRosClientSubscriberConnection.this.read(b)) != -1) {
+
+					for (int i = 0; i < l; i++) {
+
+						System.out.println(b[i] + " "
+								+ Integer.toHexString(b[i]) + " "
+								+ new String(new byte[] { b[i] }));
+
+					}
+
 				}
+
 				return null;
 			}
 
 		};
+
+	}
+
+	@Override
+	public String toString() {
+		
+		return "TcpRosClientSubscriberConnection [id=" + getConnectionId()
+				+ ", destinationId=" + getDestinationId() + ", connected="
+				+ isConnected() + "]";
+		
 	}
 
 }
