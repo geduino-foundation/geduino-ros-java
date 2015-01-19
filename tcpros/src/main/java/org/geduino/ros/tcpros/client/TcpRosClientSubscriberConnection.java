@@ -12,6 +12,7 @@ import org.geduino.ros.core.api.model.Transport;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageDetails;
 import org.geduino.ros.core.naming.model.GlobalName;
+import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
 import org.geduino.ros.core.transport.model.MessageReader;
 import org.geduino.ros.core.transport.model.SubscriberConnection;
 import org.geduino.ros.tcpros.TcpRosConnection;
@@ -19,8 +20,8 @@ import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
 import org.geduino.ros.tcpros.model.ConnectionHeader;
 
-public class TcpRosClientSubscriberConnection<T extends Message> extends TcpRosConnection
-		implements SubscriberConnection<T> {
+public class TcpRosClientSubscriberConnection<T extends Message> extends
+		TcpRosConnection implements SubscriberConnection<T> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(TcpRosClientSubscriberConnection.class);
@@ -31,14 +32,20 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends TcpRosC
 	private ConnectionHeader subscriberConnectionHeader;
 	private ConnectionHeader publisherConnectionHeader;
 
-	public TcpRosClientSubscriberConnection(GlobalName callerId, Socket socket, GlobalName topic,
-			MessageDetails<T> messageDetails)
+	public TcpRosClientSubscriberConnection(GlobalName callerId, Socket socket,
+			GlobalName topic, MessageDetails<T> messageDetails)
 			throws TcpRosException, IOException {
 
 		super(callerId, socket);
 
 		this.topic = topic;
 		this.messageDetails = messageDetails;
+
+		// Log
+		LOGGER.trace("performing handshake...");
+
+		// Handshake
+		handshake();
 
 	}
 
@@ -137,8 +144,19 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends TcpRosC
 
 	@Override
 	public MessageReader<T> getMessageReader() {
-		// TODO Auto-generated method stub
-		return null;
+		return new MessageReader<T>() {
+
+			@Override
+			public T read() throws RosTransportSerializationException {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException ex) {
+					ex.printStackTrace();
+				}
+				return null;
+			}
+
+		};
 	}
 
 }

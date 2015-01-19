@@ -1,5 +1,6 @@
 package org.geduino.ros.node;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,6 +12,8 @@ import org.apache.log4j.Logger;
 import org.geduino.ros.core.api.model.BusInfo;
 import org.geduino.ros.core.api.model.Protocol;
 import org.geduino.ros.core.api.model.ProtocolType;
+import org.geduino.ros.core.api.model.PublisherConnectionData;
+import org.geduino.ros.core.api.model.PublisherStat;
 import org.geduino.ros.core.api.model.TcpRosProtocol;
 import org.geduino.ros.core.exception.RosRuntimeException;
 import org.geduino.ros.core.messages.model.Message;
@@ -51,7 +54,7 @@ public class Publisher<T extends Message> implements
 		return messageDetails;
 	}
 
-	public Set<BusInfo> getBusInfo() {
+	public Set<BusInfo> getBusInfos() {
 
 		// Create bus info set
 		Set<BusInfo> busInfoSet = new HashSet<BusInfo>();
@@ -70,6 +73,38 @@ public class Publisher<T extends Message> implements
 		}
 
 		return busInfoSet;
+
+	}
+
+	public PublisherStat getPublisherStat() {
+
+		int sentData = 0;
+
+		// Create publisher connection data set
+		Set<PublisherConnectionData> publisherConnectionDatas = new HashSet<PublisherConnectionData>();
+
+		for (Iterator<PublisherConnection<T>> iterator = publisherConnections
+				.iterator(); iterator.hasNext();) {
+
+			// Get next publisher connection
+			PublisherConnection<T> publisherConnection = iterator.next();
+
+			// Get publisher connection data
+			PublisherConnectionData publisherConnectionData = publisherConnection
+					.getPublisherConnectionData();
+
+			publisherConnectionDatas.add(publisherConnectionData);
+
+			// Increase sent data
+			sentData += publisherConnectionData.getByteSent();
+
+		}
+
+		// Create publisher stat
+		PublisherStat publisherStat = new PublisherStat(topic, sentData,
+				publisherConnectionDatas);
+
+		return publisherStat;
 
 	}
 
@@ -130,6 +165,12 @@ public class Publisher<T extends Message> implements
 
 				// Write message
 				publisherConnection.getMessageWriter().write(message);
+
+			} catch (IOException ex) {
+
+				// Log
+				LOGGER.error("could not publish message: " + message
+						+ " to connection: " + publisherConnection, ex);
 
 			} catch (RosTransportSerializationException ex) {
 

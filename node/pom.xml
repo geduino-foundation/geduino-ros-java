@@ -37,6 +37,10 @@
 			<artifactId>log4j</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.jezhumble</groupId>
+			<artifactId>javasysmon</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.geduino.ros</groupId>
 			<artifactId>core</artifactId>
 		</dependency>

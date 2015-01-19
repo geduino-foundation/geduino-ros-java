@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.geduino.ros.core.api.model.Direction;
+import org.geduino.ros.core.api.model.Protocol;
+import org.geduino.ros.core.api.model.TcpRosProtocol;
 import org.geduino.ros.core.api.model.Transport;
 import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.core.transport.model.SocketConnection;
@@ -54,12 +56,6 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 		}
 
-		// Log
-		LOGGER.trace("performing handshake...");
-
-		// Handshake
-		handshake();
-
 	}
 
 	public GlobalName getCallerId() {
@@ -79,6 +75,16 @@ public abstract class TcpRosConnection extends SocketConnection {
 	@Override
 	public Transport getTransport() {
 		return Transport.TCPROS;
+	}
+	
+	@Override
+	public Protocol getConnectionProtocol() {
+		
+		// Get protocol
+		Protocol protocol = new TcpRosProtocol(destinationId.getHost(), destinationId.getPort());
+		
+		return protocol;
+		
 	}
 	
 	public int readLittleEndian() throws IOException {

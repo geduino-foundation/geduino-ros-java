@@ -17,16 +17,27 @@ import org.geduino.ros.core.api.model.BusInfo;
 import org.geduino.ros.core.api.model.BusStats;
 import org.geduino.ros.core.api.model.Protocol;
 import org.geduino.ros.core.api.model.ProtocolType;
+import org.geduino.ros.core.api.model.PublisherStat;
+import org.geduino.ros.core.api.model.ServiceStat;
+import org.geduino.ros.core.api.model.SubscribeStat;
 import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.core.naming.model.MessageName;
 import org.geduino.ros.node.exception.RosNodeException;
 import org.geduino.ros.node.exception.RosPublisherException;
 import org.geduino.ros.xmlrpc.client.XmlRpcMasterAPIClient;
+import org.geduino.ros.xmlrpc.client.XmlRpcSlaveAPIClient;
 import org.geduino.ros.xmlrpc.server.XmlRpcSlaveAPIServer;
+
+import com.jezhumble.javasysmon.JavaSysMon;
 
 public class NodeHandle implements SlaveAPI {
 
 	private static final Logger LOGGER = Logger.getLogger(NodeHandle.class);
+
+	private static final Set<ProtocolType> SUPPORTED_PROTOCOL_TYPES = new HashSet<ProtocolType>();
+	static {
+		SUPPORTED_PROTOCOL_TYPES.add(ProtocolType.TCPROS);
+	}
 
 	private final Node node;
 	private final URI rosMasterUri;
@@ -35,6 +46,7 @@ public class NodeHandle implements SlaveAPI {
 	private final XmlRpcSlaveAPIServer slaveAPIServer;
 
 	private final Map<GlobalName, Publisher<?>> publisherMap;
+	private final Map<GlobalName, Subscriber<?>> subscriberMap;
 
 	public NodeHandle(Node node, URI rosMasterUri) throws RosNodeException {
 
@@ -52,10 +64,11 @@ public class NodeHandle implements SlaveAPI {
 			xmlRpcMasterAPIClient.setConfig(xmlRpcClientConfigImpl);
 
 			masterAPIClient = xmlRpcMasterAPIClient;
-			
+
 			// Create slave api server
 			slaveAPIServer = new XmlRpcSlaveAPIServer(this);
-			slaveAPIServer.getSelectChannelConnector().setPort(node.getNodeUri().getPort());
+			slaveAPIServer.getSelectChannelConnector().setPort(
+					node.getNodeUri().getPort());
 
 		} catch (MalformedURLException ex) {
 
@@ -65,6 +78,7 @@ public class NodeHandle implements SlaveAPI {
 		}
 
 		publisherMap = new HashMap<GlobalName, Publisher<?>>();
+		subscriberMap = new HashMap<GlobalName, Subscriber<?>>();
 
 	}
 
@@ -81,13 +95,13 @@ public class NodeHandle implements SlaveAPI {
 
 			// Connect to master
 			masterAPIClient.getUri(node.getNodeName());
-			
+
 			// Log
 			LOGGER.debug("starting slave api server...");
-			
+
 			// Start slave api server
 			slaveAPIServer.start();
-			
+
 			// Log
 			LOGGER.info("node: " + node + " is started successfully!");
 
@@ -97,18 +111,19 @@ public class NodeHandle implements SlaveAPI {
 			throw new RosNodeException("could not start node", ex);
 
 		} catch (Exception ex) {
-			
+
 			// Throw exception
 			throw new RosNodeException("could not start node", ex);
-			
+
 		}
 
 	}
 
-	public void publish(Publisher<?> publisher) throws RosNodeException {
+	public void registerPublisher(Publisher<?> publisher)
+			throws RosNodeException {
 
 		// Log
-		LOGGER.debug("publishing: " + publisher);
+		LOGGER.debug("registering publisher: " + publisher);
 
 		try {
 
@@ -124,12 +139,43 @@ public class NodeHandle implements SlaveAPI {
 		} catch (RosApiException ex) {
 
 			// Throw exception
-			throw new RosNodeException("could not publish: " + publisher, ex);
+			throw new RosNodeException("could not register publisher: "
+					+ publisher, ex);
 
 		}
+
 	}
 
-	public void subscribe(GlobalName topic, SubscriberListener<?> listener) {
+	public void registerSubscriber(Subscriber<?> subscriber)
+			throws RosNodeException {
+
+		// Log
+		LOGGER.debug("registering subscriber: " + subscriber);
+
+		try {
+
+			// Register subscriber
+			Set<URI> publishers = masterAPIClient.registerSubscriber(node
+					.getNodeName(), subscriber.getTopic(), subscriber
+					.getMessageDetails().getMessageName(), node.getNodeUri());
+
+			// Put on subscriber map
+			subscriberMap.put(subscriber.getTopic(), subscriber);
+
+			// Log
+			LOGGER.debug("topic: " + subscriber.getTopic() + " publishers: "
+					+ publishers + " ...");
+
+			// Handle publishers
+			handlePublishers(subscriber.getTopic(), publishers);
+
+		} catch (RosApiException ex) {
+
+			// Throw exception
+			throw new RosNodeException("could not register subscriber: "
+					+ subscriber, ex);
+
+		}
 
 	}
 
@@ -137,7 +183,7 @@ public class NodeHandle implements SlaveAPI {
 	public Set<BusInfo> getBusInfo(GlobalName callerId) throws RosApiException {
 
 		// Create bus info set
-		Set<BusInfo> busInfoSet = new HashSet<BusInfo>();
+		Set<BusInfo> busInfos = new HashSet<BusInfo>();
 
 		for (Iterator<Publisher<?>> iterator = publisherMap.values().iterator(); iterator
 				.hasNext();) {
@@ -145,59 +191,143 @@ public class NodeHandle implements SlaveAPI {
 			// Get next publisher
 			Publisher<?> publisher = iterator.next();
 
-			busInfoSet.addAll(publisher.getBusInfo());
+			busInfos.addAll(publisher.getBusInfos());
 
 		}
 
-		// SUBSCRIBER CONNECTION MUST BE ADDED TOO
+		for (Iterator<Subscriber<?>> iterator = subscriberMap.values()
+				.iterator(); iterator.hasNext();) {
 
-		return busInfoSet;
+			// Get next subscriber
+			Subscriber<?> subscriber = iterator.next();
+
+			busInfos.addAll(subscriber.getBusInfos());
+
+		}
+
+		return busInfos;
 
 	}
 
 	@Override
 	public BusStats getBusStats(GlobalName callerId) throws RosApiException {
-		// TODO Auto-generated method stub
-		return null;
+
+		// Create publisher stat set
+		Set<PublisherStat> publisherStats = new HashSet<PublisherStat>();
+
+		for (Iterator<Publisher<?>> iterator = publisherMap.values().iterator(); iterator
+				.hasNext();) {
+
+			// Get next publisher
+			Publisher<?> publisher = iterator.next();
+
+			publisherStats.add(publisher.getPublisherStat());
+
+		}
+
+		// Create subscriber stat set
+		Set<SubscribeStat> subscribeStats = new HashSet<SubscribeStat>();
+
+		for (Iterator<Subscriber<?>> iterator = subscriberMap.values()
+				.iterator(); iterator.hasNext();) {
+
+			// Get next subscriber
+			Subscriber<?> subscriber = iterator.next();
+
+			subscribeStats.add(subscriber.getSubscriberStat());
+
+		}
+
+		// Create service stat
+		ServiceStat serviceStat = new ServiceStat(0, 0, 0);
+		// SERVICECONNECTION MUST BE ADDED TOO
+
+		// Create bus stats
+		BusStats busStats = new BusStats(publisherStats, subscribeStats,
+				serviceStat);
+
+		return busStats;
+
 	}
 
 	@Override
 	public URI getMasterUri(GlobalName callerId) throws RosApiException {
-		// TODO Auto-generated method stub
-		return null;
+		return rosMasterUri;
 	}
 
 	@Override
 	public int getPid(GlobalName callerId) throws RosApiException {
-		// TODO Auto-generated method stub
-		return 0;
+
+		// Create java sys mon
+		JavaSysMon javaSysMon = new JavaSysMon();
+
+		// Get process id
+		int pid = javaSysMon.currentPid();
+
+		return pid;
+
 	}
 
 	@Override
 	public Map<GlobalName, MessageName> getPublications(GlobalName callerId)
 			throws RosApiException {
-		// TODO Auto-generated method stub
-		return null;
+
+		Map<GlobalName, MessageName> publications = new HashMap<GlobalName, MessageName>();
+
+		for (Iterator<Publisher<?>> iterator = publisherMap.values().iterator(); iterator
+				.hasNext();) {
+
+			// Get next publisher
+			Publisher<?> publisher = iterator.next();
+
+			// Get topic and type
+			GlobalName topic = publisher.getTopic();
+			MessageName type = publisher.getMessageDetails().getMessageName();
+
+			publications.put(topic, type);
+
+		}
+
+		return publications;
+
 	}
 
 	@Override
 	public Map<GlobalName, MessageName> getSubscriptions(GlobalName callerId)
 			throws RosApiException {
-		// TODO Auto-generated method stub
-		return null;
+
+		Map<GlobalName, MessageName> subscrptions = new HashMap<GlobalName, MessageName>();
+
+		for (Iterator<Subscriber<?>> iterator = subscriberMap.values()
+				.iterator(); iterator.hasNext();) {
+
+			// Get next subscriber
+			Subscriber<?> subscriber = iterator.next();
+
+			// Get topic and type
+			GlobalName topic = subscriber.getTopic();
+			MessageName type = subscriber.getMessageDetails().getMessageName();
+
+			subscrptions.put(topic, type);
+
+		}
+
+		return subscrptions;
+
 	}
 
 	@Override
 	public void paramUpdate(GlobalName callerId, GlobalName parameterKey,
 			Object parameterValue) throws RosApiException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void publisherUpdate(GlobalName callerId, GlobalName topic,
 			Set<URI> publishers) throws RosApiException {
-		// TODO Auto-generated method stub
+
+		// Handle publishers
+		handlePublishers(topic, publishers);
 
 	}
 
@@ -242,6 +372,81 @@ public class NodeHandle implements SlaveAPI {
 	public void shutdown(GlobalName callerId, String message)
 			throws RosApiException {
 		// TODO Auto-generated method stub
+
+	}
+
+	private SlaveAPI createSlaveApiClient(URI nodeUri)
+			throws MalformedURLException {
+
+		// Create xml rpc client configuration
+		XmlRpcClientConfigImpl xmlRpcClientConfigImpl = new XmlRpcClientConfigImpl();
+		xmlRpcClientConfigImpl.setServerURL(nodeUri.toURL());
+
+		// Create xml rpc slave api client
+		XmlRpcSlaveAPIClient xmlRpcSlaveAPIClient = new XmlRpcSlaveAPIClient();
+		xmlRpcSlaveAPIClient.setConfig(xmlRpcClientConfigImpl);
+
+		return xmlRpcSlaveAPIClient;
+
+	}
+
+	private void handlePublishers(GlobalName topic, Set<URI> publishers)
+			throws RosApiException {
+
+		// Log
+		LOGGER.trace("looking for subscriber of topic: " + topic + " ...");
+
+		// Create protocol set
+		Set<Protocol> protocols = new HashSet<Protocol>();
+
+		for (Iterator<URI> iterator = publishers.iterator(); iterator.hasNext();) {
+
+			// Get next publisher
+			URI publisher = iterator.next();
+
+			// Log
+			LOGGER.trace("request topic to: " + publisher);
+
+			try {
+
+				// Create slave api client
+				SlaveAPI slaveAPIClient = createSlaveApiClient(publisher);
+
+				// Request topic
+				Protocol protocol = slaveAPIClient.requestTopic(
+						node.getNodeName(), topic, SUPPORTED_PROTOCOL_TYPES);
+
+				protocols.add(protocol);
+
+			} catch (MalformedURLException ex) {
+
+				// Log
+				LOGGER.error("could not get transport protocol", ex);
+
+			} catch (RosApiException ex) {
+
+				// Log
+				LOGGER.error("could not get transport protocol", ex);
+
+			}
+
+		}
+
+		// Get subscriber for given topic
+		Subscriber<?> subscriber = subscriberMap.get(topic);
+
+		if (subscriber != null) {
+
+			// Update connections
+			subscriber.updateConnections(node.getNodeName(), protocols);
+
+		} else {
+
+			// Throw exceptoon
+			throw new RosApiException("cannot find subscriber for topic: "
+					+ topic);
+
+		}
 
 	}
 

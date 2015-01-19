@@ -23,8 +23,9 @@ import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
 import org.geduino.ros.tcpros.model.ConnectionHeader;
 
-public class TcpRosServerConnection<T extends Message, K extends Message> extends TcpRosConnection implements
-		PublisherConnection<K>, ServiceConnection<T, K> {
+public class TcpRosServerConnection<T extends Message, K extends Message>
+		extends TcpRosConnection implements PublisherConnection<K>,
+		ServiceConnection<T, K> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(TcpRosServerConnection.class);
@@ -34,7 +35,15 @@ public class TcpRosServerConnection<T extends Message, K extends Message> extend
 
 	public TcpRosServerConnection(GlobalName callerdId, Socket socket)
 			throws TcpRosException, IOException {
+
 		super(callerdId, socket);
+
+		// Log
+		LOGGER.trace("performing handshake...");
+
+		// Handshake
+		handshake();
+
 	}
 
 	public boolean isPublisherConnection() {

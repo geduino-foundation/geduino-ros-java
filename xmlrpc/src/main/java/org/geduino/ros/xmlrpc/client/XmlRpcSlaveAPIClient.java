@@ -110,8 +110,8 @@ public class XmlRpcSlaveAPIClient extends XmlRpcClient implements SlaveAPI {
 					.assemble(protocolTypes);
 
 			// Execute request
-			Object response = execute("requestTopic", new Object[] { callerId,
-					topic, protocolTypeObjects });
+			Object response = execute("requestTopic", new Object[] { callerId.toString(),
+					topic.toString(), protocolTypeObjects });
 
 			// Get result
 			RosResult<Object[]> result = new RosResult<Object[]>(response);

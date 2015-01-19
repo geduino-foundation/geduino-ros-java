@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.geduino.ros.core.api.model.ProtocolType;
-import org.geduino.ros.xmlrpc.assembler.util.impl.ToStringEntryToObjectAssembler;
+import org.geduino.ros.xmlrpc.assembler.util.impl.ProtocolTypeEntryToObjectAssembler;
 import org.geduino.ros.xmlrpc.exception.InvalidObjectTypeException;
 
 public class SetToObjectAssembler<E> {
@@ -12,7 +12,7 @@ public class SetToObjectAssembler<E> {
 	private final EntryToObjectAssembler<E> entryToObjectAssembler;
 
 	public static final SetToObjectAssembler<ProtocolType> PROTOCOL_TYPE = new SetToObjectAssembler<ProtocolType>(
-			new ToStringEntryToObjectAssembler<ProtocolType>());
+			new ProtocolTypeEntryToObjectAssembler());
 
 	public SetToObjectAssembler(EntryToObjectAssembler<E> entryToObjectAssembler) {
 		this.entryToObjectAssembler = entryToObjectAssembler;
