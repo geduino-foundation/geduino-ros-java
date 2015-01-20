@@ -1,6 +1,5 @@
 package org.geduino.ros.tcpros;
 
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URI;
@@ -16,12 +15,12 @@ import org.geduino.ros.core.api.model.TcpRosProtocol;
 import org.geduino.ros.core.api.model.Transport;
 import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.core.transport.model.SocketConnection;
+import org.geduino.ros.core.util.BytesUtil;
 import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
 import org.geduino.ros.tcpros.exception.TcpRosHeaderSerializationException;
 import org.geduino.ros.tcpros.model.ConnectionHeader;
 import org.geduino.ros.tcpros.util.ConnectionHeaderUtil;
-import org.geduino.ros.tcpros.util.LittleEndianUtil;
 
 public abstract class TcpRosConnection extends SocketConnection {
 
@@ -76,17 +75,18 @@ public abstract class TcpRosConnection extends SocketConnection {
 	public Transport getTransport() {
 		return Transport.TCPROS;
 	}
-	
+
 	@Override
 	public Protocol getConnectionProtocol() {
-		
+
 		// Get protocol
-		Protocol protocol = new TcpRosProtocol(destinationId.getHost(), destinationId.getPort());
-		
+		Protocol protocol = new TcpRosProtocol(destinationId.getHost(),
+				destinationId.getPort());
+
 		return protocol;
-		
+
 	}
-	
+
 	public int readLittleEndian() throws IOException {
 
 		byte[] bytes = new byte[4];
@@ -95,7 +95,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 		read(bytes, 4);
 
 		// Get integer
-		int integer = LittleEndianUtil.toLittleEndianInt(bytes);
+		int integer = BytesUtil.toLittleEndianInt(bytes);
 
 		return integer;
 
@@ -118,7 +118,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 	public void writeLittleEndian(int integer) throws IOException {
 
 		// Get little endian bytes
-		byte[] bytes = LittleEndianUtil.toLittleEndianBytes(integer);
+		byte[] bytes = BytesUtil.toLittleEndianBytes(integer);
 
 		// Write bytes
 		write(bytes);
@@ -147,7 +147,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 		// Get field value
 		String fieldValue = connectionHeader.get(fieldName);
-		
+
 		if (fieldValue == null) {
 
 			// Throw exception
@@ -155,7 +155,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 					+ " is missing: " + connectionHeader);
 
 		}
-		
+
 		return fieldValue;
 
 	}
