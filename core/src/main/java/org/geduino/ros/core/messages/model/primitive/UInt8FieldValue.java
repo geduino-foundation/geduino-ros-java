@@ -38,7 +38,7 @@ public class UInt8FieldValue implements FieldValue {
 		if (bytes.length == 1) {
 
 			// Get int value value
-			intValue = (int) bytes[0];
+			intValue = bytes[0] & 0xFF;
 
 		} else {
 

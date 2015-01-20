@@ -8,10 +8,10 @@ public class UInt8FieldValueTest extends FieldValueTestCase {
 
 		// Create uint8 field value
 		UInt8FieldValue uInt8FieldValue = new UInt8FieldValue();
-		uInt8FieldValue.setIntegerValue(32);
+		uInt8FieldValue.setIntegerValue(172);
 
 		// Assert
-		assertBytes(new byte[] { 0x20 }, uInt8FieldValue);
+		assertBytes(new byte[] { -84 }, uInt8FieldValue);
 
 	}
 
@@ -21,10 +21,10 @@ public class UInt8FieldValueTest extends FieldValueTestCase {
 		UInt8FieldValue uInt8FieldValue = new UInt8FieldValue();
 
 		// Set bytes
-		uInt8FieldValue.setBytes(new byte[] { 0x20 });
+		uInt8FieldValue.setBytes(new byte[] { -84 });
 
 		// Assert
-		assertEquals(32, uInt8FieldValue.getIntegerValue());
+		assertEquals(172, uInt8FieldValue.getIntegerValue());
 
 	}
 

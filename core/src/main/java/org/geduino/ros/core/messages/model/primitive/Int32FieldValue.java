@@ -3,13 +3,13 @@ package org.geduino.ros.core.messages.model.primitive;
 import org.geduino.ros.core.messages.exception.RosMessageSerializeException;
 import org.geduino.ros.core.messages.model.FieldValue;
 
-public class Int16FieldValue implements FieldValue {
+public class Int32FieldValue implements FieldValue {
 
 	private static final long serialVersionUID = 1L;
 
 	private int intValue;
 
-	public Int16FieldValue() {
+	public Int32FieldValue() {
 		this.intValue = 0;
 	}
 
@@ -25,9 +25,11 @@ public class Int16FieldValue implements FieldValue {
 	public byte[] getBytes() {
 
 		// Get bytes
-		byte[] bytes = new byte[2];
+		byte[] bytes = new byte[4];
 		bytes[0] = (byte) intValue;
 		bytes[1] = (byte) (intValue >> 8);
+		bytes[2] = (byte) (intValue >> 16);
+		bytes[3] = (byte) (intValue >> 24);
 
 		return bytes;
 
@@ -36,21 +38,12 @@ public class Int16FieldValue implements FieldValue {
 	@Override
 	public void setBytes(byte[] bytes) throws RosMessageSerializeException {
 
-		if (bytes.length == 2) {
+		if (bytes.length == 4) {
 
-			if ((bytes[1] & 0x80) != 0) {
-				
-				// Get int value value
-				intValue = -(((~(bytes[1]) << 8) & 0x0000FF00) | (~(bytes[0]) & 0x000000FF)) - 1;
-				
-			}  else {
-				
-				// Get int value value
-				intValue =  ((bytes[1] << 8) & 0x0000FF00) | (bytes[0] & 0x000000FF);
-				
-			}
-			
-			
+			// Get int value value
+			intValue = ((bytes[3] << 24) & 0xFF000000)
+					| ((bytes[2] << 16) & 0x00FF0000)
+					| ((bytes[1] << 8) & 0x0000FF00) | (bytes[0] & 0x000000FF);
 
 		} else {
 
@@ -78,7 +71,7 @@ public class Int16FieldValue implements FieldValue {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Int16FieldValue other = (Int16FieldValue) obj;
+		Int32FieldValue other = (Int32FieldValue) obj;
 		if (intValue != other.intValue)
 			return false;
 		return true;

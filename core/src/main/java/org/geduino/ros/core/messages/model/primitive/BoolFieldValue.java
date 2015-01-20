@@ -42,7 +42,7 @@ public class BoolFieldValue implements FieldValue {
 		if (bytes.length == 1) {
 
 			// Get boolean value
-			booleanValue = bytes[0] == 0x01;
+			booleanValue = bytes[0] != 0x00;
 
 		} else {
 

@@ -38,7 +38,7 @@ public class Int8FieldValue implements FieldValue {
 		if (bytes.length == 1) {
 
 			// Get int value value
-			intValue = bytes[0];
+			intValue = (int) bytes[0];
 
 		} else {
 

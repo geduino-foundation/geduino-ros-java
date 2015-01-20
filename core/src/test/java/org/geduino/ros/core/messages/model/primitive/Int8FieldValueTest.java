@@ -11,13 +11,18 @@ public class Int8FieldValueTest extends FieldValueTestCase {
 		int8FieldValue.setIntegerValue(32);
 
 		// Assert
-		assertBytes(new byte[] { 0x20 }, int8FieldValue);
+		assertBytes(new byte[] { 32 }, int8FieldValue);
 
-		// Set negative value
+	}
+
+	public void testGetBytesNegative() {
+
+		// Create int8 field value
+		Int8FieldValue int8FieldValue = new Int8FieldValue();
 		int8FieldValue.setIntegerValue(-32);
 
 		// Assert
-		assertBytes(new byte[] { -0x20 }, int8FieldValue);
+		assertBytes(new byte[] { -32 }, int8FieldValue);
 
 	}
 
@@ -27,13 +32,18 @@ public class Int8FieldValueTest extends FieldValueTestCase {
 		Int8FieldValue int8FieldValue = new Int8FieldValue();
 
 		// Set bytes
-		int8FieldValue.setBytes(new byte[] { 0x20 });
+		int8FieldValue.setBytes(new byte[] { 32 });
 
 		// Assert
 		assertEquals(32, int8FieldValue.getIntegerValue());
 
-		// Set bytes
-		int8FieldValue.setBytes(new byte[] { -0x20 });
+	}
+
+	public void testSetBytesNegative() throws RosMessageSerializeException {
+
+		// Create int8 field value
+		Int8FieldValue int8FieldValue = new Int8FieldValue();
+		int8FieldValue.setBytes(new byte[] { -32 });
 
 		// Assert
 		assertEquals(-32, int8FieldValue.getIntegerValue());
