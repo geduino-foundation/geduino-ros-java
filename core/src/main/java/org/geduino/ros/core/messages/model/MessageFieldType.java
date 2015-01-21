@@ -1,6 +1,7 @@
 package org.geduino.ros.core.messages.model;
 
 import org.geduino.ros.core.naming.model.MessageName;
+import org.geduino.ros.core.naming.model.Name;
 
 public class MessageFieldType implements FieldType {
 
@@ -14,6 +15,11 @@ public class MessageFieldType implements FieldType {
 
 	public MessageName getMessageName() {
 		return messageName;
+	}
+	
+	@Override
+	public Name getSimpleName() {
+		return messageName.getLastChild();
 	}
 
 	@Override
@@ -46,5 +52,6 @@ public class MessageFieldType implements FieldType {
 	public String toString() {
 		return messageName.toString();
 	}
-
+	
 }
+

@@ -1,6 +1,7 @@
 package org.geduino.ros.messages.description.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 import org.geduino.ros.core.messages.model.FieldType;
 import org.geduino.ros.core.messages.model.MessageFieldType;
 import org.geduino.ros.core.naming.model.MessageName;
+import org.geduino.ros.core.util.CollectionFilter;
 
 public class MessageDescription implements Serializable {
 
@@ -33,6 +35,30 @@ public class MessageDescription implements Serializable {
 		return fieldDescriptions;
 	}
 
+	public List<FieldDescription> getConstantFieldDescriptions() {
+
+		List<FieldDescription> constantFieldDescriptions = new ArrayList<FieldDescription>();
+
+		// Apply filter
+		new CollectionFilter<FieldDescription>(fieldDescriptions).filter(
+				constantFieldDescriptions, new ConstantFieldFilter(true));
+
+		return constantFieldDescriptions;
+
+	}
+
+	public List<FieldDescription> getNoConstantFieldDescriptions() {
+
+		List<FieldDescription> constantFieldDescriptions = new ArrayList<FieldDescription>();
+
+		// Apply filter
+		new CollectionFilter<FieldDescription>(fieldDescriptions).filter(
+				constantFieldDescriptions, new ConstantFieldFilter(false));
+
+		return constantFieldDescriptions;
+
+	}
+
 	public Set<MessageName> getDependencies() {
 
 		Set<MessageName> dependencies = new HashSet<MessageName>();
@@ -53,7 +79,7 @@ public class MessageDescription implements Serializable {
 
 				// Get message name
 				MessageName messageName = messageFieldType.getMessageName();
-				
+
 				// Add to dependencies
 				dependencies.add(messageName);
 

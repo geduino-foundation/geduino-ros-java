@@ -139,7 +139,8 @@ public abstract class Name implements Named {
 
 	}
 
-	public static MessageName parseMessageName(BaseName packageName, String string) {
+	public static MessageName parseMessageName(BaseName packageName,
+			String string) {
 
 		if (!string.contains("/")) {
 
@@ -154,13 +155,14 @@ public abstract class Name implements Named {
 		return messageName;
 
 	}
-	
+
 	public static MessageName parseMessageName(String string) {
 
 		if (!string.contains("/")) {
 
 			// Throw
-			throw new RosNamingRuntimeException("invalid message name: " + string);
+			throw new RosNamingRuntimeException("invalid message name: "
+					+ string);
 
 		}
 
@@ -185,6 +187,23 @@ public abstract class Name implements Named {
 
 	public Name getName() {
 		return this;
+	}
+
+	public Name getLastChild() {
+
+		int index = name.lastIndexOf("/");
+
+		if (index != -1) {
+
+			// Get last child
+			Name lastChild = parseName(name.substring(index));
+
+			return lastChild;
+
+		} else {
+			return this;
+		}
+
 	}
 
 	@Override

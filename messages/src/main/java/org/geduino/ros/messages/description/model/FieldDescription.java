@@ -28,9 +28,8 @@ public class FieldDescription implements Serializable {
 	private final int size;
 	private final String value;
 
-	public static FieldDescription parseFieldDefinition(
-			BaseName packageName, String string)
-			throws RosMessageDescriptionException {
+	public static FieldDescription parseFieldDefinition(BaseName packageName,
+			String string) throws RosMessageDescriptionException {
 
 		// Get matcher for given string
 		Matcher matcher = FIELD_DESCRIPTION_PATTERN.matcher(string);
@@ -139,6 +138,15 @@ public class FieldDescription implements Serializable {
 		return size;
 	}
 
+	public boolean isConstant() {
+
+		// Get is constant
+		boolean isConstant = value != null;
+
+		return isConstant;
+
+	}
+
 	public String getValue() {
 		return value;
 	}
@@ -171,12 +179,30 @@ public class FieldDescription implements Serializable {
 	@Override
 	public String toString() {
 
-		// Get string
-		String string = type.toString()
-				.concat((size != -1) ? "[" + size + "]" : "").concat(" ")
-				.concat(name);
+		StringBuffer stringBuffer = new StringBuffer();
+		stringBuffer.append(type);
 
-		return string;
+		if (array) {
+
+			if (size != -1) {
+
+				// Add array size
+				stringBuffer.append("[").append(size).append("]");
+
+			} else {
+
+				// Add array without size
+				stringBuffer.append("[]");
+
+			}
+
+		}
+
+		// Add name and value if exists
+		stringBuffer.append(" ").append(name)
+				.append((value != null) ? "=".concat(value) : "");
+
+		return stringBuffer.toString();
 
 	}
 
