@@ -67,5 +67,19 @@ public class NameTest extends TestCase {
 		assertEquals("/private/foo", privateName.resolve(rootName).toString());
 
 	}
+	
+	public void testGetParent() {
+
+		// Create names
+		ResolvedName globalName = (ResolvedName) Name.parseName("/global/foo");
+		ResolvedName rootName = (ResolvedName) Name.parseName("/");
+
+		// Assert
+		assertEquals("/global", globalName.getParent().toString());
+		assertEquals("/", globalName.getParent().getParent().toString());
+		assertEquals("/", globalName.getParent().getParent().getParent().toString());
+		assertEquals("/", rootName.getParent().toString());
+
+	}
 
 }

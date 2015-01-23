@@ -20,7 +20,7 @@ public class RootName extends Name implements ResolvedName {
 
 	@Override
 	public ResolvedName getParent() {
-		return null;
+		return this;
 	}
 
 }

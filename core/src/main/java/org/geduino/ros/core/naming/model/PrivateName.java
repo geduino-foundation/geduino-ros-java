@@ -9,31 +9,40 @@ public class PrivateName extends Name implements UnresolvedName {
 	public PrivateName(String privateName) {
 		super(privateName);
 	}
-	
+
 	@Override
 	protected void validate(String string) {
-		
+
 		if (!Name.isPrivate(string)) {
-			
+
 			// Throw exception
-			throw new RosNamingRuntimeException("invalid private name: " + string);
-			
+			throw new RosNamingRuntimeException("invalid private name: "
+					+ string);
+
 		}
-		
+
 	}
 
 	@Override
-	public Name resolve(ResolvedName resolvedName) {
+	public ResolvedName resolve(ResolvedName resolvedName) {
 
 		// Get resolved name syntax
 		String nameSyntax = resolvedName.getName().name.concat(
 				resolvedName.isRoot() ? "" : "/")
 				.concat(this.name.substring(1));
 
-		// Create resolved name
+		// Create name
 		Name name = Name.parseName(nameSyntax);
 
-		return name;
+		if (name instanceof ResolvedName) {
+			return (ResolvedName) name;
+		} else {
+
+			// Throw exception
+			throw new RosNamingRuntimeException("private name: " + this.name
+					+ " cannot be resolved using: " + resolvedName.toString());
+
+		}
 
 	}
 

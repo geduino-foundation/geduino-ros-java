@@ -9,17 +9,18 @@ public class GlobalName extends Name implements ResolvedName {
 	public GlobalName(String globalName) {
 		super(globalName);
 	}
-	
+
 	@Override
 	protected void validate(String string) {
-		
+
 		if (!Name.isGlobal(string)) {
-			
+
 			// Throw exception
-			throw new RosNamingRuntimeException("invalid global name: " + string);
-			
+			throw new RosNamingRuntimeException("invalid global name: "
+					+ string);
+
 		}
-		
+
 	}
 
 	@Override
@@ -30,13 +31,24 @@ public class GlobalName extends Name implements ResolvedName {
 	@Override
 	public ResolvedName getParent() {
 
-		// Get parent name syntax
-		String parentNameSyntax = name.substring(0, name.lastIndexOf("/"));
+		int index = name.lastIndexOf("/");
 
-		// Get parent name
-		ResolvedName parentName = (ResolvedName) Name.parseName(parentNameSyntax);
+		if (index == 0) {
 
-		return parentName;
+			return new RootName();
+
+		} else {
+
+			// Get parent name syntax
+			String parentNameSyntax = name.substring(0, index);
+
+			// Get parent name
+			ResolvedName parentName = (ResolvedName) Name
+					.parseName(parentNameSyntax);
+
+			return parentName;
+
+		}
 
 	}
 
