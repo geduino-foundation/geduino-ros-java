@@ -41,9 +41,13 @@ public class Int32FieldValue implements FieldValue {
 		if (bytes.length == 4) {
 
 			// Get int value value
-			intValue = ((bytes[3] << 24) & 0xFF000000)
-					| ((bytes[2] << 16) & 0x00FF0000)
-					| ((bytes[1] << 8) & 0x0000FF00) | (bytes[0] & 0x000000FF);
+			intValue = 0xFF & bytes[3];
+			intValue <<= 8;
+			intValue += 0xFF & bytes[2];
+			intValue <<= 8;
+			intValue += 0xFF & bytes[1];
+			intValue <<= 8;
+			intValue += 0xFF & bytes[0];
 
 		} else {
 

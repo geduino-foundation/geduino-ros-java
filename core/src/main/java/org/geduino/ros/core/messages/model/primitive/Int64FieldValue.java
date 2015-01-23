@@ -1,10 +1,7 @@
 package org.geduino.ros.core.messages.model.primitive;
 
-import java.nio.ByteBuffer;
-
 import org.geduino.ros.core.messages.exception.RosMessageSerializeException;
 import org.geduino.ros.core.messages.model.FieldValue;
-import org.geduino.ros.core.util.BytesUtil;
 
 public class Int64FieldValue implements FieldValue {
 
@@ -27,20 +24,18 @@ public class Int64FieldValue implements FieldValue {
 	@Override
 	public byte[] getBytes() {
 
-		byte[] bytes = new byte[8];
-		
-		// Create byte buffer
-		ByteBuffer byteBuffer = ByteBuffer.allocate(Long.SIZE);
-		byteBuffer.putLong(longValue);
-		byteBuffer.flip();
-		
 		// Get bytes
-		byteBuffer.get(bytes);
-		
-		// Reverse bytes
-		byte[] reversedBytes = BytesUtil.reverse(bytes);
-		
-		return reversedBytes;
+		byte[] bytes = new byte[8];
+		bytes[0] = (byte) (longValue);
+		bytes[1] = (byte) (longValue >> 8);
+		bytes[2] = (byte) (longValue >> 16);
+		bytes[3] = (byte) (longValue >> 24);
+		bytes[4] = (byte) (longValue >> 32);
+		bytes[5] = (byte) (longValue >> 40);
+		bytes[6] = (byte) (longValue >> 48);
+		bytes[7] = (byte) (longValue >> 56);
+
+		return bytes;
 
 	}
 
@@ -49,20 +44,22 @@ public class Int64FieldValue implements FieldValue {
 
 		if (bytes.length == 8) {
 
-			// Create byte buffer
-			ByteBuffer byteBuffer = ByteBuffer.allocate(Long.SIZE);
-			byteBuffer.put(bytes[7]);
-			byteBuffer.put(bytes[6]);
-			byteBuffer.put(bytes[5]);
-			byteBuffer.put(bytes[4]);
-			byteBuffer.put(bytes[3]);
-			byteBuffer.put(bytes[2]);
-			byteBuffer.put(bytes[1]);
-			byteBuffer.put(bytes[0]);
-			byteBuffer.flip();
-
 			// Get long value
-			longValue = byteBuffer.getLong();
+			longValue = 0xFF & bytes[7];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[6];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[5];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[4];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[3];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[2];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[1];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[0];
 
 		} else {
 

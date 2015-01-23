@@ -29,10 +29,10 @@ public class Float32FieldValue implements FieldValue {
 
 		// Get bytes
 		byte[] bytes = new byte[4];
-		bytes[0] = (byte) (bits & 0xff);
-		bytes[1] = (byte) ((bits >> 8) & 0xff);
-		bytes[2] = (byte) ((bits >> 16) & 0xff);
-		bytes[3] = (byte) ((bits >> 24) & 0xff);
+		bytes[0] = (byte) bits;
+		bytes[1] = (byte) (bits >> 8);
+		bytes[2] = (byte) (bits >> 16);
+		bytes[3] = (byte) (bits >> 24);
 
 		return bytes;
 
@@ -44,9 +44,13 @@ public class Float32FieldValue implements FieldValue {
 		if (bytes.length == 4) {
 
 			// Get bits
-			int bits = ((bytes[3] << 24) & 0xFF000000)
-					| ((bytes[2] << 16) & 0x00FF0000)
-					| ((bytes[1] << 8) & 0x0000FF00) | (bytes[0] & 0x000000FF);
+			int bits = 0xFF & bytes[3];
+			bits <<= 8;
+			bits += 0xFF & bytes[2];
+			bits <<= 8;
+			bits += 0xFF & bytes[1];
+			bits <<= 8;
+			bits += 0xFF & bytes[0];
 
 			// Get float value
 			floatValue = Float.intBitsToFloat(bits);

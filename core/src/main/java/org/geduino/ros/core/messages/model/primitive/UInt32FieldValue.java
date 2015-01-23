@@ -1,7 +1,5 @@
 package org.geduino.ros.core.messages.model.primitive;
 
-import java.nio.ByteBuffer;
-
 import org.geduino.ros.core.messages.exception.RosMessageSerializeException;
 import org.geduino.ros.core.messages.model.FieldValue;
 
@@ -42,17 +40,14 @@ public class UInt32FieldValue implements FieldValue {
 
 		if (bytes.length == 4) {
 
-			// Create byte buffer
-			ByteBuffer byteBuffer = ByteBuffer.allocate(Long.SIZE);
-			byteBuffer.put(new byte[] { 0, 0, 0, 0 });
-			byteBuffer.put(bytes[3]);
-			byteBuffer.put(bytes[2]);
-			byteBuffer.put(bytes[1]);
-			byteBuffer.put(bytes[0]);
-			byteBuffer.flip();
-
 			// Get long value
-			longValue = byteBuffer.getLong();
+			longValue = 0xFF & bytes[3];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[2];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[1];
+			longValue <<= 8;
+			longValue += 0xFF & bytes[0];
 
 		} else {
 

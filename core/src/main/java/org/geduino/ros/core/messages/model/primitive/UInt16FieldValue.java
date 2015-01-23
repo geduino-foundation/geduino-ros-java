@@ -28,7 +28,7 @@ public class UInt16FieldValue implements FieldValue {
 		byte[] bytes = new byte[2];
 		bytes[0] = (byte) intValue;
 		bytes[1] = (byte) (intValue >> 8);
-		
+
 		return bytes;
 
 	}
@@ -39,8 +39,10 @@ public class UInt16FieldValue implements FieldValue {
 		if (bytes.length == 2) {
 
 			// Get int value value
-			intValue =  ((bytes[1] << 8) & 0x0000FF00) | (bytes[0] & 0x000000FF);
-			
+			intValue = 0xFF & bytes[1];
+			intValue <<= 8;
+			intValue += 0xFF & bytes[0];
+
 		} else {
 
 			// Throw exception

@@ -1,10 +1,7 @@
 package org.geduino.ros.core.messages.model.primitive;
 
-import java.nio.ByteBuffer;
-
 import org.geduino.ros.core.messages.exception.RosMessageSerializeException;
 import org.geduino.ros.core.messages.model.FieldValue;
-import org.geduino.ros.core.util.BytesUtil;
 
 public class Float64FieldValue implements FieldValue {
 
@@ -32,14 +29,14 @@ public class Float64FieldValue implements FieldValue {
 
 		// Get bytes
 		byte[] bytes = new byte[8];
-		bytes[0] = (byte) (bits & 0xff);
-		bytes[1] = (byte) ((bits >> 8) & 0xff);
-		bytes[2] = (byte) ((bits >> 16) & 0xff);
-		bytes[3] = (byte) ((bits >> 24) & 0xff);
-		bytes[4] = (byte) ((bits >> 32) & 0xff);
-		bytes[5] = (byte) ((bits >> 40) & 0xff);
-		bytes[6] = (byte) ((bits >> 48) & 0xff);
-		bytes[7] = (byte) ((bits >> 56) & 0xff);
+		bytes[0] = (byte) (bits);
+		bytes[1] = (byte) (bits >> 8);
+		bytes[2] = (byte) (bits >> 16);
+		bytes[3] = (byte) (bits >> 24);
+		bytes[4] = (byte) (bits >> 32);
+		bytes[5] = (byte) (bits >> 40);
+		bytes[6] = (byte) (bits >> 48);
+		bytes[7] = (byte) (bits >> 56);
 
 		return bytes;
 
@@ -50,11 +47,25 @@ public class Float64FieldValue implements FieldValue {
 
 		if (bytes.length == 8) {
 
-			// Reverse bytes
-			byte[] reverseBytes = BytesUtil.reverse(bytes);
+			// Get bits
+			long bits = 0xFF & bytes[7];
+			bits <<= 8;
+			bits += 0xFF & bytes[6];
+			bits <<= 8;
+			bits += 0xFF & bytes[5];
+			bits <<= 8;
+			bits += 0xFF & bytes[4];
+			bits <<= 8;
+			bits += 0xFF & bytes[3];
+			bits <<= 8;
+			bits += 0xFF & bytes[2];
+			bits <<= 8;
+			bits += 0xFF & bytes[1];
+			bits <<= 8;
+			bits += 0xFF & bytes[0];
 
 			// Get double value
-			doubleValue = ByteBuffer.wrap(reverseBytes).getDouble();
+			doubleValue = Double.longBitsToDouble(bits);
 
 		} else {
 
