@@ -65,7 +65,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 			RosTransportSerializationException {
 
 		// Read bytes
-		byte[] bytes = read(4);
+		byte[] bytes = read(8);
 
 		// Get bits
 		long bits = 0xFF & bytes[7];
@@ -142,7 +142,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 			RosTransportSerializationException {
 
 		// Read bytes
-		byte[] bytes = read(4);
+		byte[] bytes = read(8);
 
 		// Get long value
 		long longValue = 0xFF & bytes[7];
@@ -257,7 +257,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 			RosTransportSerializationException {
 
 		// Read bytes
-		byte[] bytes = read(8);
+		byte[] bytes = read(1);
 
 		// Get int value value
 		int intValue = bytes[0] & 0xFF;
