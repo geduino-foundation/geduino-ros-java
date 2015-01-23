@@ -5,26 +5,21 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import org.apache.log4j.Logger;
-import org.geduino.ros.core.messages.model.Message;
-import org.geduino.ros.core.naming.model.GlobalName;
+import org.geduino.ros.tcpros.TcpRosConnection;
+import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.server.exception.TcpRosServerException;
 
-class TcpRosServerRunnable<T extends Message, K extends Message> implements
-		Runnable {
+class TcpRosServerRunnable<C extends TcpRosConnection> implements Runnable {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(TcpRosServerRunnable.class);
 
-	private final GlobalName callerId;
-	private final TcpRosServerConfig<T, K> tcpRosServerConfig;
+	private final TcpRosServerConfig<C> tcpRosServerConfig;
 
 	private final ServerSocket serverSocket;
 
-	TcpRosServerRunnable(GlobalName callerId,
-			TcpRosServerConfig<T, K> tcpRosServerConfig)
+	TcpRosServerRunnable(TcpRosServerConfig<C> tcpRosServerConfig)
 			throws TcpRosServerException {
-
-		this.callerId = callerId;
 
 		// Must be the first since is used to create other objects
 		this.tcpRosServerConfig = tcpRosServerConfig;
@@ -112,12 +107,37 @@ class TcpRosServerRunnable<T extends Message, K extends Message> implements
 		LOGGER.trace("accepted connection from: "
 				+ socket.getInetAddress().getHostName());
 
-		// Create tcp ros server connection handler
-		TcpRosServerConnectionHandler<T, K> tcpRosServerConnectionHandler = new TcpRosServerConnectionHandler<T, K>(
-				callerId, tcpRosServerConfig, socket);
+		try {
 
-		// Handle tcp ros server connection
-		tcpRosServerConnectionHandler.handle();
+			// Get tcp ros connection factory
+			TcpRosConnectionFactory<C> tcpRosConnectionFactory = tcpRosServerConfig
+					.getTcpRosConnectionFactory();
+
+			if (tcpRosConnectionFactory != null) {
+
+				// Create tcp ros connection
+				C tcpRosConnection = tcpRosConnectionFactory.newConnection(
+						socket, tcpRosServerConfig);
+
+				TcpRosServerConnectionHandler<C> tcpRosServerConnectionHandler = new TcpRosServerConnectionHandler<C>(
+						tcpRosConnection, tcpRosServerConfig);
+
+				// Handle tcp ros server connection
+				tcpRosServerConnectionHandler.handle();
+
+			} else {
+
+				//
+				LOGGER.error("could not exstabilish connection: no tcpRosConnectionFactory in config");
+
+			}
+
+		} catch (TcpRosException ex) {
+
+			// Log
+			LOGGER.error("could not exstabilish connection", ex);
+
+		}
 
 	}
 

@@ -2,15 +2,15 @@ package org.geduino.ros.tcpros.server;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.geduino.ros.core.messages.model.Message;
+import org.geduino.ros.tcpros.TcpRosConnection;
 
-class TcpRosServerThread<T extends Message, K extends Message> extends Thread {
+class TcpRosServerThread<C extends TcpRosConnection> extends Thread {
 
 	private static final Logger LOGGER = Logger.getLogger(TcpRosServerThread.class);
 
-	private final TcpRosServerRunnable<T, K> tcpRosServerRunnable;
+	private final TcpRosServerRunnable<C> tcpRosServerRunnable;
 
-	TcpRosServerThread(TcpRosServerRunnable<T, K> tcpRosServerRunnable) {
+	TcpRosServerThread(TcpRosServerRunnable<C> tcpRosServerRunnable) {
 
 		super(tcpRosServerRunnable, "tcpros-server");
 

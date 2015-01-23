@@ -14,11 +14,11 @@ import org.geduino.ros.core.api.model.Protocol;
 import org.geduino.ros.core.api.model.TcpRosProtocol;
 import org.geduino.ros.core.api.model.Transport;
 import org.geduino.ros.core.naming.model.GlobalName;
-import org.geduino.ros.core.transport.model.SocketConnection;
-import org.geduino.ros.core.util.BytesUtil;
+import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
+import org.geduino.ros.core.transport.model.PrimitiveTypeReader;
+import org.geduino.ros.core.transport.model.PrimitiveTypeWriter;
 import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
-import org.geduino.ros.tcpros.exception.TcpRosHeaderSerializationException;
 import org.geduino.ros.tcpros.model.ConnectionHeader;
 import org.geduino.ros.tcpros.util.ConnectionHeaderUtil;
 
@@ -29,6 +29,45 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 	private final GlobalName callerId;
 	private final URI destinationId;
+
+	protected static String getMandatoryField(
+			ConnectionHeader connectionHeader, String fieldName)
+			throws TcpRosHandshakeException {
+
+		// Get field value
+		String fieldValue = connectionHeader.get(fieldName);
+
+		if (fieldValue == null) {
+
+			// Throw exception
+			throw new TcpRosHandshakeException("mandatory field " + fieldName
+					+ " is missing: " + connectionHeader);
+
+		}
+
+		return fieldValue;
+
+	}
+
+	protected static String getMandatoryField(
+			ConnectionHeader connectionHeader, String fieldName,
+			String expectedValue) throws TcpRosHandshakeException {
+
+		// Get field value
+		String fieldValue = getMandatoryField(connectionHeader, fieldName);
+
+		if (!expectedValue.equals(fieldValue)) {
+
+			// Throw exception
+			throw new TcpRosHandshakeException("field: " + fieldName
+					+ " expected value: " + expectedValue + " but was: "
+					+ fieldValue);
+
+		}
+
+		return fieldValue;
+
+	}
 
 	public TcpRosConnection(GlobalName callerId, Socket socket)
 			throws TcpRosException, IOException {
@@ -57,25 +96,6 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 	}
 
-	public GlobalName getCallerId() {
-		return callerId;
-	}
-
-	@Override
-	public URI getDestinationId() {
-		return destinationId;
-	}
-
-	@Override
-	public Direction getDirection() {
-		return Direction.BOTH;
-	}
-
-	@Override
-	public Transport getTransport() {
-		return Transport.TCPROS;
-	}
-
 	@Override
 	public Protocol getConnectionProtocol() {
 
@@ -87,81 +107,42 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 	}
 
-	public int readLittleEndian() throws IOException {
-
-		byte[] bytes = new byte[4];
-
-		// Read bytes
-		read(bytes, 4);
-
-		// Get integer
-		int integer = BytesUtil.toLittleEndianInt(bytes);
-
-		return integer;
-
+	public GlobalName getCallerId() {
+		return callerId;
 	}
 
-	public String readString(int length) throws IOException {
-
-		byte[] bytes = new byte[length];
-
-		// Read bytes
-		read(bytes, length);
-
-		// Get string
-		String string = new String(bytes);
-
-		return string;
-
+	public URI getDestinationId() {
+		return destinationId;
 	}
 
-	public void writeLittleEndian(int integer) throws IOException {
-
-		// Get little endian bytes
-		byte[] bytes = BytesUtil.toLittleEndianBytes(integer);
-
-		// Write bytes
-		write(bytes);
-
+	public Direction getDirection() {
+		return Direction.BOTH;
 	}
 
-	public void writeString(String string) throws IOException {
-
-		// Get bytes
-		byte[] bytes = string.getBytes();
-
-		// Write bytes
-		write(bytes);
-
+	public Transport getTransport() {
+		return Transport.TCPROS;
 	}
-
-	public abstract ConnectionHeader getPublisherConnectionHeader();
-
-	public abstract ConnectionHeader getSubscriberConnectionHeader();
 
 	protected abstract void handshake() throws IOException,
 			TcpRosHandshakeException;
 
-	protected String getMandatoryField(ConnectionHeader connectionHeader,
-			String fieldName) throws TcpRosHandshakeException {
+	protected void handleFailedHandshake(TcpRosHandshakeException ex)
+			throws IOException, RosTransportSerializationException {
 
-		// Get field value
-		String fieldValue = connectionHeader.get(fieldName);
+		// Create publisher connection header
+		ConnectionHeader publisherConnectionHeader = new ConnectionHeader();
+		publisherConnectionHeader.put(ConnectionHeader.ERROR, ex.getMessage());
 
-		if (fieldValue == null) {
-
-			// Throw exception
-			throw new TcpRosHandshakeException("mandatory field " + fieldName
-					+ " is missing: " + connectionHeader);
-
-		}
-
-		return fieldValue;
+		// Write publisher connection header
+		write(publisherConnectionHeader);
 
 	}
 
 	protected ConnectionHeader readConnectionHeader() throws IOException,
-			TcpRosHeaderSerializationException {
+			RosTransportSerializationException {
+
+		// Get primitive type reader
+		PrimitiveTypeReader primitiveTypeReader = getPrimitiveTypeReader();
 
 		// Create connection header
 		ConnectionHeader connectionHeader = new ConnectionHeader();
@@ -174,7 +155,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 		// Get header length and total header length (including header length 4
 		// bytes)
-		int headerLength = readLittleEndian();
+		int headerLength = primitiveTypeReader.readInt32();
 		int totalHeaderLength = headerLength + 4;
 
 		// Increase read bytes
@@ -189,7 +170,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("reading 4 bytes field length...");
 
 			// Get next field length
-			int fieldLength = readLittleEndian();
+			int fieldLength = primitiveTypeReader.readInt32();
 
 			// Increase read bytes
 			readBytes += 4;
@@ -198,7 +179,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("reading " + fieldLength + " bytes field...");
 
 			// Get next field string
-			String fieldString = readString(fieldLength);
+			String fieldString = primitiveTypeReader.readString(fieldLength);
 
 			// Increase read bytes
 			readBytes += fieldLength;
@@ -218,7 +199,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			} else {
 
 				// Throw exception
-				throw new TcpRosHeaderSerializationException(
+				throw new RosTransportSerializationException(
 						"field string must contain equals: " + fieldString);
 
 			}
@@ -232,7 +213,11 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 	}
 
-	protected void write(ConnectionHeader connectionHeader) throws IOException {
+	protected void write(ConnectionHeader connectionHeader) throws IOException,
+			RosTransportSerializationException {
+
+		// Get primitive type writer
+		PrimitiveTypeWriter primitiveTypeWriter = getPrimitiveTypeWriter();
 
 		// Get connection header length and total header length (including
 		// header length 4
@@ -248,7 +233,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 		LOGGER.trace("writing 4 bytes header length...");
 
 		// Write header length
-		writeLittleEndian(headerLength);
+		primitiveTypeWriter.writeInt32(headerLength);
 
 		// Increase wrote bytes
 		wroteBytes += 4;
@@ -269,7 +254,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("writing 4 bytes field length...");
 
 			// Write field length
-			writeLittleEndian(fieldLength);
+			primitiveTypeWriter.writeInt32(fieldLength);
 
 			// Increase wrote bytes
 			wroteBytes += 4;
@@ -278,9 +263,9 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("writing " + fieldLength + " bytes field...");
 
 			// Write key
-			writeString(field.getKey());
-			writeString("=");
-			writeString(field.getValue());
+			primitiveTypeWriter.writeString(field.getKey());
+			primitiveTypeWriter.writeString("=");
+			primitiveTypeWriter.writeString(field.getValue());
 
 			// Increase wrote bytes
 			wroteBytes += fieldLength;

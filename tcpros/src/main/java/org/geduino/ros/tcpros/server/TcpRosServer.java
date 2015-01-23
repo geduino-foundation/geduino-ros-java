@@ -1,32 +1,21 @@
 package org.geduino.ros.tcpros.server;
 
 import org.apache.log4j.Logger;
-import org.geduino.ros.core.messages.model.Message;
-import org.geduino.ros.core.naming.model.GlobalName;
+import org.geduino.ros.tcpros.TcpRosConnection;
 import org.geduino.ros.tcpros.server.exception.TcpRosServerException;
 
-public class TcpRosServer<T extends Message, K extends Message> {
+public class TcpRosServer<C extends TcpRosConnection> {
 
 	private static final Logger LOGGER = Logger.getLogger(TcpRosServer.class);
 
-	private final GlobalName callerId;
-	private final TcpRosServerConfig<T, K> tcpRosServerConfig;
+	private final TcpRosServerConfig<C> tcpRosServerConfig;
 
-	private TcpRosServerThread<T, K> tcpRosServerThread;
+	private TcpRosServerThread<C> tcpRosServerThread;
 	
 	private int effectivePort;
 
-	public TcpRosServer(GlobalName callerId) {
-		this.callerId = callerId;
-		this.tcpRosServerConfig = new TcpRosServerConfig<T, K>();
-	}
-
-	public GlobalName getCallerId() {
-		return callerId;
-	}
-
-	public TcpRosServerConfig<T, K> getTcpRosServerConfig() {
-		return tcpRosServerConfig;
+	public TcpRosServer(TcpRosServerConfig<C> tcpRosServerConfig) {
+		this.tcpRosServerConfig = tcpRosServerConfig;
 	}
 
 	public synchronized void start() throws TcpRosServerException {
@@ -34,14 +23,13 @@ public class TcpRosServer<T extends Message, K extends Message> {
 		if (tcpRosServerThread == null) {
 
 			// Create tcp ros server runnable
-			TcpRosServerRunnable<T, K> tcpRosServerRunnable = new TcpRosServerRunnable<T, K>(
-					callerId, tcpRosServerConfig);
+			TcpRosServerRunnable<C> tcpRosServerRunnable = new TcpRosServerRunnable<C>(tcpRosServerConfig);
 			
 			// Get effective port
 			effectivePort = tcpRosServerRunnable.getPort();
 
 			// Create tcp ros server thread
-			tcpRosServerThread = new TcpRosServerThread<T, K>(tcpRosServerRunnable);
+			tcpRosServerThread = new TcpRosServerThread<C>(tcpRosServerRunnable);
 
 			// Log
 			LOGGER.trace("starting tcpros server thread...");

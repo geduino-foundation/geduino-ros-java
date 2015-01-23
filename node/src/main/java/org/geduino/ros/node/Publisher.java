@@ -15,34 +15,35 @@ import org.geduino.ros.core.api.model.ProtocolType;
 import org.geduino.ros.core.api.model.PublisherConnectionData;
 import org.geduino.ros.core.api.model.PublisherStat;
 import org.geduino.ros.core.api.model.TcpRosProtocol;
-import org.geduino.ros.core.exception.RosRuntimeException;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageDetails;
 import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
 import org.geduino.ros.core.transport.model.ConnectionListener;
 import org.geduino.ros.core.transport.model.PublisherConnection;
-import org.geduino.ros.core.transport.model.ServiceConnection;
 import org.geduino.ros.node.exception.RosPublisherException;
-import org.geduino.ros.tcpros.server.TcpRosServer;
 import org.geduino.ros.tcpros.server.exception.TcpRosServerException;
+import org.geduino.ros.tcpros.server.publisher.TcpRosServerPublisher;
+import org.geduino.ros.tcpros.server.publisher.TcpRosServerPublisherConfig;
+import org.geduino.ros.tcpros.server.publisher.TcpRosServerPublisherConnection;
+import org.geduino.ros.tcpros.server.publisher.TcpRosServerPublisherConnectionFactory;
 
-public class Publisher<T extends Message> implements
-		ConnectionListener<Message, T> {
+public class Publisher<M extends Message> implements
+		ConnectionListener<TcpRosServerPublisherConnection<M>> {
 
 	private static final Logger LOGGER = Logger.getLogger(Publisher.class);
 
 	private final GlobalName topic;
-	private final MessageDetails<T> messageDetails;
+	private final MessageDetails<M> messageDetails;
 
-	private final List<PublisherConnection<T>> publisherConnections;
+	private final List<PublisherConnection<M>> publisherConnections;
 
-	public Publisher(GlobalName topic, MessageDetails<T> messageDetails) {
+	public Publisher(GlobalName topic, MessageDetails<M> messageDetails) {
 
 		this.topic = topic;
 		this.messageDetails = messageDetails;
 
-		publisherConnections = new ArrayList<PublisherConnection<T>>();
+		publisherConnections = new ArrayList<PublisherConnection<M>>();
 
 	}
 
@@ -50,7 +51,7 @@ public class Publisher<T extends Message> implements
 		return topic;
 	}
 
-	public MessageDetails<T> getMessageDetails() {
+	public MessageDetails<M> getMessageDetails() {
 		return messageDetails;
 	}
 
@@ -59,11 +60,11 @@ public class Publisher<T extends Message> implements
 		// Create bus info set
 		Set<BusInfo> busInfoSet = new HashSet<BusInfo>();
 
-		for (Iterator<PublisherConnection<T>> iterator = publisherConnections
+		for (Iterator<PublisherConnection<M>> iterator = publisherConnections
 				.iterator(); iterator.hasNext();) {
 
 			// Get next publisher connection
-			PublisherConnection<T> publisherConnection = iterator.next();
+			PublisherConnection<M> publisherConnection = iterator.next();
 
 			// Get bus info
 			BusInfo busInfo = publisherConnection.getBusInfo();
@@ -83,11 +84,11 @@ public class Publisher<T extends Message> implements
 		// Create publisher connection data set
 		Set<PublisherConnectionData> publisherConnectionDatas = new HashSet<PublisherConnectionData>();
 
-		for (Iterator<PublisherConnection<T>> iterator = publisherConnections
+		for (Iterator<PublisherConnection<M>> iterator = publisherConnections
 				.iterator(); iterator.hasNext();) {
 
 			// Get next publisher connection
-			PublisherConnection<T> publisherConnection = iterator.next();
+			PublisherConnection<M> publisherConnection = iterator.next();
 
 			// Get publisher connection data
 			PublisherConnectionData publisherConnectionData = publisherConnection
@@ -116,18 +117,23 @@ public class Publisher<T extends Message> implements
 			// Log
 			LOGGER.trace("create new tcpros server...");
 
-			// Create tcp ros server
-			TcpRosServer<Message, T> tcpRosServer = new TcpRosServer<Message, T>(
-					nodeName);
-			tcpRosServer.getTcpRosServerConfig().addConnectionListener(this);
+			// Create server config
+			TcpRosServerPublisherConfig<M> tcpRosServerPublisherConfig = new TcpRosServerPublisherConfig<M>(
+					nodeName, 0, 1,
+					new TcpRosServerPublisherConnectionFactory<M>(topic, messageDetails));
+			tcpRosServerPublisherConfig.addConnectionListener(this);
+
+			// Create tcp ros server publisher
+			TcpRosServerPublisher<M> tcpRosServerPublisher = new TcpRosServerPublisher<M>(
+					tcpRosServerPublisherConfig);
 
 			try {
 
-				// Start tcp ros server
-				tcpRosServer.start();
+				// Start tcp ros server publisher
+				tcpRosServerPublisher.start();
 
 				// Get tcp ros server port
-				int port = tcpRosServer.getEffectivePort();
+				int port = tcpRosServerPublisher.getEffectivePort();
 
 				// Create tcp ros protocol
 				TcpRosProtocol tcpRosProtocol = new TcpRosProtocol(
@@ -153,13 +159,13 @@ public class Publisher<T extends Message> implements
 
 	}
 
-	public void publish(T message) {
+	public void publish(M message) {
 
-		for (Iterator<PublisherConnection<T>> iterator = publisherConnections
+		for (Iterator<PublisherConnection<M>> iterator = publisherConnections
 				.iterator(); iterator.hasNext();) {
 
 			// Get next publisher connection
-			PublisherConnection<T> publisherConnection = iterator.next();
+			PublisherConnection<M> publisherConnection = iterator.next();
 
 			try {
 
@@ -185,21 +191,11 @@ public class Publisher<T extends Message> implements
 	}
 
 	@Override
-	public void incomingPublisherConnection(
-			PublisherConnection<T> publisherConnection) {
+	public void incomingConnection(
+			TcpRosServerPublisherConnection<M> tcpRosServerPublisherConnection) {
 
 		// Add publisher connection
-		publisherConnections.add(publisherConnection);
-
-	}
-
-	@Override
-	public void incomingServiceConnection(
-			ServiceConnection<Message, T> serviceConnection) {
-
-		// Throw exception
-		throw new RosRuntimeException(
-				"service connectis not supported by publisher");
+		publisherConnections.add(tcpRosServerPublisherConnection);
 
 	}
 

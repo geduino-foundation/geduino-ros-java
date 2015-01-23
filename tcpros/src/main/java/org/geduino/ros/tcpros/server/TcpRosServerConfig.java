@@ -4,48 +4,51 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.geduino.ros.core.messages.model.Message;
+import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.core.transport.model.ConnectionListener;
+import org.geduino.ros.tcpros.TcpRosConnection;
 
-public class TcpRosServerConfig<T extends Message, K extends Message> {
+public class TcpRosServerConfig<C extends TcpRosConnection> {
 
-	private int port;
-	private int backlog;
+	private final GlobalName callerId;
+	private final int port;
+	private final int backlog;
+	private final TcpRosConnectionFactory<C> tcpRosConnectionFactory;
+	private final List<ConnectionListener<C>> connectionListeners;
 
-	private final List<ConnectionListener<T, K>> connectionListeners;
+	public TcpRosServerConfig(GlobalName callerId, int port, int backLog, TcpRosConnectionFactory<C> tcpRosConnectionFactory) {
 
-	public TcpRosServerConfig() {
+		this.callerId = callerId;
+		this.port = port;
+		this.backlog = backLog;
+		this.tcpRosConnectionFactory = tcpRosConnectionFactory;
 
-		// Set default value
-		port = 0;
-		backlog = 1;
+		this.connectionListeners = new ArrayList<ConnectionListener<C>>();
 
-		connectionListeners = new ArrayList<ConnectionListener<T, K>>();
+	}
 
+	public GlobalName getCallerId() {
+		return callerId;
 	}
 
 	public int getPort() {
 		return port;
 	}
 
-	public void setPort(int port) {
-		this.port = port;
-	}
-
 	public int getBacklog() {
 		return backlog;
 	}
-
-	public void setBacklog(int backlog) {
-		this.backlog = backlog;
+	
+	public TcpRosConnectionFactory<C> getTcpRosConnectionFactory() {
+		return tcpRosConnectionFactory;
 	}
 
-	public void addConnectionListener(ConnectionListener<T, K> connectionListener) {
+	public void addConnectionListener(ConnectionListener<C> connectionListener) {
 		connectionListeners.add(connectionListener);
 	}
 
 	public boolean removeConnectionListener(
-			ConnectionListener<T, K> connectionListener) {
+			ConnectionListener<C> connectionListener) {
 		return connectionListeners.remove(connectionListener);
 	}
 
@@ -53,10 +56,10 @@ public class TcpRosServerConfig<T extends Message, K extends Message> {
 		connectionListeners.clear();
 	}
 
-	public List<ConnectionListener<T, K>> getConnectionListeners() {
+	public List<ConnectionListener<C>> getConnectionListeners() {
 
 		// Create unmodifiable copy of connection listeners
-		List<ConnectionListener<T, K>> unmodifiableConnectionListeners = Collections
+		List<ConnectionListener<C>> unmodifiableConnectionListeners = Collections
 				.unmodifiableList(connectionListeners);
 
 		return unmodifiableConnectionListeners;

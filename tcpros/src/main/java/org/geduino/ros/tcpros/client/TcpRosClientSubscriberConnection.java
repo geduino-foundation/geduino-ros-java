@@ -29,9 +29,6 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 	private final GlobalName topic;
 	private final MessageDetails<T> messageDetails;
 
-	private ConnectionHeader subscriberConnectionHeader;
-	private ConnectionHeader publisherConnectionHeader;
-
 	public TcpRosClientSubscriberConnection(GlobalName callerId, Socket socket,
 			GlobalName topic, MessageDetails<T> messageDetails)
 			throws TcpRosException, IOException {
@@ -84,70 +81,77 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 	}
 
 	@Override
-	public ConnectionHeader getPublisherConnectionHeader() {
-		return publisherConnectionHeader;
-	}
-
-	@Override
-	public ConnectionHeader getSubscriberConnectionHeader() {
-		return subscriberConnectionHeader;
-	}
-
-	@Override
 	protected void handshake() throws IOException, TcpRosHandshakeException {
 
-		// Create connection header
-		subscriberConnectionHeader = new ConnectionHeader();
-		subscriberConnectionHeader.put(ConnectionHeader.CALLER_ID,
-				getCallerId().toString());
-		subscriberConnectionHeader
-				.put(ConnectionHeader.TOPIC, topic.toString());
-		subscriberConnectionHeader.put(ConnectionHeader.MESSAGE_DEFINITION,
-				messageDetails.getMessageDefinition());
-		subscriberConnectionHeader.put(ConnectionHeader.MD5_SUM,
-				messageDetails.getMessageMd5Sum());
-		subscriberConnectionHeader.put(ConnectionHeader.TYPE, messageDetails
-				.getMessageName().toString());
+		try {
 
-		// Log
-		LOGGER.trace("sending subscriber connection header...");
+			// Create connection header
+			ConnectionHeader subscriberConnectionHeader = new ConnectionHeader();
+			subscriberConnectionHeader.put(ConnectionHeader.CALLER_ID,
+					getCallerId().toString());
+			subscriberConnectionHeader.put(ConnectionHeader.TOPIC,
+					topic.toString());
+			subscriberConnectionHeader.put(ConnectionHeader.MESSAGE_DEFINITION,
+					messageDetails.getMessageDefinition());
+			subscriberConnectionHeader.put(ConnectionHeader.MD5_SUM,
+					messageDetails.getMessageMd5Sum());
+			subscriberConnectionHeader.put(ConnectionHeader.TYPE,
+					messageDetails.getMessageName().toString());
 
-		// Write connection header
-		write(subscriberConnectionHeader);
+			// Log
+			LOGGER.trace("sending subscriber connection header...");
 
-		// Read connection header
-		publisherConnectionHeader = readConnectionHeader();
+			// Write connection header
+			write(subscriberConnectionHeader);
 
-		if (publisherConnectionHeader.containsKey(ConnectionHeader.ERROR)) {
+			// Read connection header
+			ConnectionHeader publisherConnectionHeader = readConnectionHeader();
 
-			// Get error
-			String error = publisherConnectionHeader
-					.get(ConnectionHeader.ERROR);
+			if (publisherConnectionHeader.containsKey(ConnectionHeader.ERROR)) {
+
+				// Get error
+				String error = publisherConnectionHeader
+						.get(ConnectionHeader.ERROR);
+
+				// Throw exception
+				throw new TcpRosHandshakeException(error);
+
+			}
+
+			// Read connection header data
+			getMandatoryField(publisherConnectionHeader,
+					ConnectionHeader.MD5_SUM, messageDetails.getMessageMd5Sum());
+			getMandatoryField(publisherConnectionHeader, ConnectionHeader.TYPE,
+					messageDetails.getMessageName().toString());
+
+		} catch (TcpRosHandshakeException ex) {
+
+			try {
+
+				// Handle failed handshake
+				handleFailedHandshake(ex);
+
+			} catch (IOException ex2) {
+
+				// Log
+				LOGGER.error("could not notify handshake error to destination",
+						ex2);
+
+			} catch (RosTransportSerializationException ex2) {
+
+				// Log
+				LOGGER.error("could not notify handshake error to destination",
+						ex2);
+
+			}
+
+			// Throw original exception
+			throw ex;
+
+		} catch (RosTransportSerializationException ex) {
 
 			// Throw exception
-			throw new TcpRosHandshakeException(error);
-
-		}
-
-		// Read connection header data
-		String md5sum = getMandatoryField(publisherConnectionHeader,
-				ConnectionHeader.MD5_SUM);
-		String type = getMandatoryField(publisherConnectionHeader,
-				ConnectionHeader.TYPE);
-
-		if (!md5sum.equals(messageDetails.getMessageMd5Sum())) {
-
-			// Throw exception
-			throw new TcpRosHandshakeException("expected message md5sum: "
-					+ messageDetails.getMessageMd5Sum() + " but was: " + md5sum);
-
-		}
-
-		if (!type.equals(messageDetails.getMessageName().toString())) {
-
-			// Throw exception
-			throw new TcpRosHandshakeException("expected message type: "
-					+ messageDetails.getMessageName() + " but was: " + type);
+			throw new TcpRosHandshakeException("handshake failed", ex);
 
 		}
 
@@ -161,21 +165,6 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 			public T read() throws IOException,
 					RosTransportSerializationException {
 
-				byte[] b = new byte[128];
-				int l = -1;
-
-				while ((l = TcpRosClientSubscriberConnection.this.read(b)) != -1) {
-
-					for (int i = 0; i < l; i++) {
-
-						System.out.println(b[i] + " "
-								+ Integer.toHexString(b[i]) + " "
-								+ new String(new byte[] { b[i] }));
-
-					}
-
-				}
-
 				return null;
 			}
 
@@ -185,11 +174,11 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 
 	@Override
 	public String toString() {
-		
+
 		return "TcpRosClientSubscriberConnection [id=" + getConnectionId()
 				+ ", destinationId=" + getDestinationId() + ", connected="
 				+ isConnected() + "]";
-		
+
 	}
 
 }

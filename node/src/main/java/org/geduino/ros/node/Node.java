@@ -3,7 +3,11 @@ package org.geduino.ros.node;
 import java.net.URI;
 
 import org.geduino.ros.core.exception.RosException;
+import org.geduino.ros.core.naming.exception.RosNamingRuntimeException;
 import org.geduino.ros.core.naming.model.GlobalName;
+import org.geduino.ros.core.naming.model.Name;
+import org.geduino.ros.core.naming.model.ResolvedName;
+import org.geduino.ros.core.naming.model.UnresolvedName;
 
 public abstract class Node {
 
@@ -22,7 +26,52 @@ public abstract class Node {
 	public URI getNodeUri() {
 		return nodeUri;
 	}
-	
+
+	public GlobalName getResolvedName(String string) {
+
+		// Get name
+		Name name = Name.parseName(string);
+
+		if (name instanceof UnresolvedName) {
+
+			// Cast to unresolved name
+			UnresolvedName unresolvedName = (UnresolvedName) name;
+
+			// Resolve name
+			ResolvedName resolvedName = unresolvedName.resolve(nodeName);
+
+			if (resolvedName instanceof GlobalName) {
+
+				// Cast to global name
+				GlobalName globalName = (GlobalName) resolvedName;
+
+				return globalName;
+
+			} else {
+
+				// Throw exception
+				throw new RosNamingRuntimeException("string: " + string
+						+ " cannot be resolved as global name");
+
+			}
+
+		} else if (name instanceof GlobalName) {
+
+			// Cast to global name
+			GlobalName globalName = (GlobalName) name;
+
+			return globalName;
+
+		} else {
+
+			// Throw exception
+			throw new RosNamingRuntimeException("string: " + string
+					+ " cannot be resolved as global name");
+
+		}
+
+	}
+
 	public abstract void run() throws RosException;
 
 	@Override

@@ -1,158 +1,70 @@
 package org.geduino.ros.tcpros.server;
 
-
-import java.io.IOException;
-import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.geduino.ros.core.messages.model.Message;
-import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.core.transport.model.ConnectionListener;
-import org.geduino.ros.tcpros.exception.TcpRosException;
+import org.geduino.ros.tcpros.TcpRosConnection;
 
-class TcpRosServerConnectionHandler<T extends Message, K extends Message>  {
+class TcpRosServerConnectionHandler<C extends TcpRosConnection> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(TcpRosServerConnectionHandler.class);
 
-	private final GlobalName callerId;
-	private final TcpRosServerConfig<T, K> tcpRosServerConfig;
-	private final Socket socket;
+	private final C tcpRosServerConnection;
+	private final TcpRosServerConfig<C> tcpRosServerConfig;
 
-	TcpRosServerConnectionHandler(GlobalName callerId,
-			TcpRosServerConfig<T, K> tcpRosServerConfig, Socket socket) {
-		this.callerId = callerId;
+	TcpRosServerConnectionHandler(C tcpRosServerConnection,
+			TcpRosServerConfig<C> tcpRosServerConfig) {
+		this.tcpRosServerConnection = tcpRosServerConnection;
 		this.tcpRosServerConfig = tcpRosServerConfig;
-		this.socket = socket;
 	}
 
 	void handle() {
 
-		try {
+		// Get connection listeners
+		List<ConnectionListener<C>> connectionListeners = tcpRosServerConfig
+				.getConnectionListeners();
 
-			// Create tcp ros server connection connection
-			TcpRosServerConnection<T, K> tcpRosServerConnection = new TcpRosServerConnection<T, K>(
-					callerId, socket);
-
-			// Get connection listeners
-			List<ConnectionListener<T, K>> connectionListeners = tcpRosServerConfig
-					.getConnectionListeners();
-
-			if (tcpRosServerConnection.isPublisherConnection()) {
-
-				// Fire incoming publisher connection
-				fireIncomingPublisherConnection(tcpRosServerConnection,
-						connectionListeners);
-
-			} else if (tcpRosServerConnection.isServiceConnection()) {
-
-				// Fire incoming service connection
-				fireIncomingServiceConnection(tcpRosServerConnection,
-						connectionListeners);
-
-			} else {
-
-				// Log
-				LOGGER.warn("unable to handle connection: "
-						+ tcpRosServerConnection);
-
-			}
-
-		} catch (TcpRosException ex) {
-
-			// Log
-			LOGGER.error("an error occurs handling connection", ex);
-
-		} catch (IOException ex) {
-
-			// Log
-			LOGGER.error("an error occurs handling connection", ex);
-
-		}
+		// Fire incoming publisher connection
+		fireIncomingPublisherConnection(tcpRosServerConnection,
+				connectionListeners);
 
 	}
 
-	private void fireIncomingPublisherConnection(
-			TcpRosServerConnection<T, K> tcpRosServerConnection,
-			List<ConnectionListener<T, K>> connectionListeners) {
+	private void fireIncomingPublisherConnection(C tcpRosConnection,
+			List<ConnectionListener<C>> connectionListeners) {
 
 		// Log
-		LOGGER.trace("firing incoming publisher connection to "
+		LOGGER.trace("firing incoming connection to "
 				+ connectionListeners.size() + " listeners...");
 
-		for (Iterator<ConnectionListener<T, K>> iterator = connectionListeners
+		for (Iterator<ConnectionListener<C>> iterator = connectionListeners
 				.iterator(); iterator.hasNext();) {
 
 			// Get next connection listener
-			ConnectionListener<T, K> connectionListener = iterator.next();
+			ConnectionListener<C> connectionListener = iterator.next();
 
-			// Fire incoming publisher connection
-			fireIncomingPublisherConnection(tcpRosServerConnection,
-					connectionListener);
-
-		}
-
-	}
-
-	private void fireIncomingServiceConnection(
-			TcpRosServerConnection<T, K> tcpRosServerConnection,
-			List<ConnectionListener<T, K>> connectionListeners) {
-
-		// Log
-		LOGGER.trace("firing incoming service connection to "
-				+ connectionListeners.size() + " listeners...");
-
-		for (Iterator<ConnectionListener<T, K>> iterator = connectionListeners
-				.iterator(); iterator.hasNext();) {
-
-			// Get next connection listener
-			ConnectionListener<T, K> connectionListener = iterator.next();
-
-			// Fire incoming service connection
-			fireIncomingServiceConnection(tcpRosServerConnection,
-					connectionListener);
+			// Fire incoming connection
+			fireIncomingConnection(tcpRosConnection, connectionListener);
 
 		}
 
 	}
 
-	private void fireIncomingPublisherConnection(
-			TcpRosServerConnection<T, K> tcpRosServerConnection,
-			ConnectionListener<T, K> connectionListener) {
+	private void fireIncomingConnection(C tcpRosConnection,
+			ConnectionListener<C> connectionListener) {
 
 		try {
 
-			// Fire incomimg publisher connection
-			connectionListener
-					.incomingPublisherConnection(tcpRosServerConnection);
+			// Fire incomimg connection
+			connectionListener.incomingConnection(tcpRosConnection);
 
 		} catch (Exception ex) {
 
 			// Log
-			LOGGER.error(
-					"an error occurs firing incoming publisher connection", ex);
-
-		}
-
-	}
-
-	private void fireIncomingServiceConnection(
-			TcpRosServerConnection<T, K> tcpRosServerConnection,
-			ConnectionListener<T, K> connectionListener) {
-
-		try {
-
-			// Fire incomimg service connection
-			connectionListener
-					.incomingServiceConnection(tcpRosServerConnection);
-
-		} catch (Exception ex) {
-
-			// Log
-			LOGGER.error("an error occurs firing incoming service connection",
-					ex);
+			LOGGER.error("an error occurs firing incoming connection", ex);
 
 		}
 
