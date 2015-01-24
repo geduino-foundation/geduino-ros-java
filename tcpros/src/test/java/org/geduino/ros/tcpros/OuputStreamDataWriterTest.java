@@ -5,12 +5,12 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
-import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
+import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
 
-public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
+public class OuputStreamDataWriterTest extends TestCase {
 
 	private ByteBufferOutputStream byteBufferOutputStream;
-	private OutputStreamPrimitiveTypeWriter outputStreamPrimitiveTypeWriter;
+	private OutputStreamDataWriter outputStreamPrimitiveTypeWriter;
 
 	@Override
 	public void setUp() {
@@ -19,12 +19,12 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 		byteBufferOutputStream = new ByteBufferOutputStream(64);
 
 		// Create primitive type ouput stream writer
-		outputStreamPrimitiveTypeWriter = new OutputStreamPrimitiveTypeWriter(
+		outputStreamPrimitiveTypeWriter = new OutputStreamDataWriter(
 				byteBufferOutputStream);
 
 	}
 
-	public void testBool() throws RosTransportSerializationException,
+	public void testBool() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -43,7 +43,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testFloat32() throws RosTransportSerializationException,
+	public void testFloat32() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -64,7 +64,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testFloat64() throws RosTransportSerializationException,
+	public void testFloat64() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -85,7 +85,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testInt8() throws RosTransportSerializationException,
+	public void testInt8() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -106,7 +106,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testInt16() throws RosTransportSerializationException,
+	public void testInt16() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -127,7 +127,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testInt32() throws RosTransportSerializationException,
+	public void testInt32() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -148,7 +148,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testInt64() throws RosTransportSerializationException,
+	public void testInt64() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -169,7 +169,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testUInt8() throws RosTransportSerializationException,
+	public void testUInt8() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -181,7 +181,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testUInt16() throws RosTransportSerializationException,
+	public void testUInt16() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -193,7 +193,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testUInt32() throws RosTransportSerializationException,
+	public void testUInt32() throws RosMessageSerializationException,
 			IOException {
 
 		// Write
@@ -205,7 +205,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testUInt64() throws RosTransportSerializationException, IOException {
+	public void testUInt64() throws RosMessageSerializationException, IOException {
 
 		// Write
 		outputStreamPrimitiveTypeWriter.writeUInt64(PrimitiveBytes.UINT_64);
@@ -216,7 +216,7 @@ public class OuputStreamPrimitiveTypeWriterTest extends TestCase {
 
 	}
 
-	public void testString() throws RosTransportSerializationException,
+	public void testString() throws RosMessageSerializationException,
 			IOException {
 
 		// Write

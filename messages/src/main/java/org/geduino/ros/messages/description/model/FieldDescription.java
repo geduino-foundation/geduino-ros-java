@@ -4,9 +4,6 @@ import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.geduino.ros.core.messages.model.FieldType;
-import org.geduino.ros.core.messages.model.MessageFieldType;
-import org.geduino.ros.core.messages.model.PrimitiveFieldType;
 import org.geduino.ros.core.naming.model.BaseName;
 import org.geduino.ros.core.naming.model.MessageName;
 import org.geduino.ros.core.naming.model.Name;

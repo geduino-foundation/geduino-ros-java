@@ -13,10 +13,10 @@ import org.geduino.ros.core.api.model.Direction;
 import org.geduino.ros.core.api.model.Protocol;
 import org.geduino.ros.core.api.model.TcpRosProtocol;
 import org.geduino.ros.core.api.model.Transport;
+import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
+import org.geduino.ros.core.messages.model.DataReader;
+import org.geduino.ros.core.messages.model.DataWriter;
 import org.geduino.ros.core.naming.model.GlobalName;
-import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
-import org.geduino.ros.core.transport.model.PrimitiveTypeReader;
-import org.geduino.ros.core.transport.model.PrimitiveTypeWriter;
 import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
 import org.geduino.ros.tcpros.model.ConnectionHeader;
@@ -127,7 +127,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			TcpRosHandshakeException;
 
 	protected void handleFailedHandshake(TcpRosHandshakeException ex)
-			throws IOException, RosTransportSerializationException {
+			throws IOException, RosMessageSerializationException {
 
 		// Create publisher connection header
 		ConnectionHeader publisherConnectionHeader = new ConnectionHeader();
@@ -139,10 +139,10 @@ public abstract class TcpRosConnection extends SocketConnection {
 	}
 
 	protected ConnectionHeader readConnectionHeader() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
-		// Get primitive type reader
-		PrimitiveTypeReader primitiveTypeReader = getPrimitiveTypeReader();
+		// Get data reader
+		DataReader dataReader = getDataReader();
 
 		// Create connection header
 		ConnectionHeader connectionHeader = new ConnectionHeader();
@@ -155,7 +155,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 		// Get header length and total header length (including header length 4
 		// bytes)
-		int headerLength = primitiveTypeReader.readInt32();
+		int headerLength = dataReader.readInt32();
 		int totalHeaderLength = headerLength + 4;
 
 		// Increase read bytes
@@ -170,7 +170,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("reading 4 bytes field length...");
 
 			// Get next field length
-			int fieldLength = primitiveTypeReader.readInt32();
+			int fieldLength = dataReader.readInt32();
 
 			// Increase read bytes
 			readBytes += 4;
@@ -179,7 +179,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("reading " + fieldLength + " bytes field...");
 
 			// Get next field string
-			String fieldString = primitiveTypeReader.readString(fieldLength);
+			String fieldString = dataReader.readString(fieldLength);
 
 			// Increase read bytes
 			readBytes += fieldLength;
@@ -199,7 +199,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			} else {
 
 				// Throw exception
-				throw new RosTransportSerializationException(
+				throw new RosMessageSerializationException(
 						"field string must contain equals: " + fieldString);
 
 			}
@@ -214,10 +214,10 @@ public abstract class TcpRosConnection extends SocketConnection {
 	}
 
 	protected void write(ConnectionHeader connectionHeader) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
-		// Get primitive type writer
-		PrimitiveTypeWriter primitiveTypeWriter = getPrimitiveTypeWriter();
+		// Get data writer
+		DataWriter dataWriter = getDataWriter();
 
 		// Get connection header length and total header length (including
 		// header length 4
@@ -233,7 +233,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 		LOGGER.trace("writing 4 bytes header length...");
 
 		// Write header length
-		primitiveTypeWriter.writeInt32(headerLength);
+		dataWriter.writeInt32(headerLength);
 
 		// Increase wrote bytes
 		wroteBytes += 4;
@@ -254,7 +254,7 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("writing 4 bytes field length...");
 
 			// Write field length
-			primitiveTypeWriter.writeInt32(fieldLength);
+			dataWriter.writeInt32(fieldLength);
 
 			// Increase wrote bytes
 			wroteBytes += 4;
@@ -263,9 +263,9 @@ public abstract class TcpRosConnection extends SocketConnection {
 			LOGGER.trace("writing " + fieldLength + " bytes field...");
 
 			// Write key
-			primitiveTypeWriter.writeString(field.getKey());
-			primitiveTypeWriter.writeString("=");
-			primitiveTypeWriter.writeString(field.getValue());
+			dataWriter.writeString(field.getKey());
+			dataWriter.writeString("=");
+			dataWriter.writeString(field.getValue());
 
 			// Increase wrote bytes
 			wroteBytes += fieldLength;

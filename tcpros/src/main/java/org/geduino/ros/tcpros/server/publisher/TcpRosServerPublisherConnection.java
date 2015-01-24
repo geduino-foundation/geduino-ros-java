@@ -10,11 +10,11 @@ import org.geduino.ros.core.api.model.BusInfo;
 import org.geduino.ros.core.api.model.Direction;
 import org.geduino.ros.core.api.model.PublisherConnectionData;
 import org.geduino.ros.core.api.model.Transport;
+import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageDetails;
+import org.geduino.ros.core.messages.model.MessageWriter;
 import org.geduino.ros.core.naming.model.GlobalName;
-import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
-import org.geduino.ros.core.transport.model.MessageWriter;
 import org.geduino.ros.core.transport.model.PublisherConnection;
 import org.geduino.ros.tcpros.TcpRosConnection;
 import org.geduino.ros.tcpros.exception.TcpRosException;
@@ -116,7 +116,7 @@ public class TcpRosServerPublisherConnection<M extends Message> extends
 				LOGGER.error("could not notify handshake error to destination",
 						ex2);
 
-			} catch (RosTransportSerializationException ex2) {
+			} catch (RosMessageSerializationException ex2) {
 
 				// Log
 				LOGGER.error("could not notify handshake error to destination",
@@ -127,7 +127,7 @@ public class TcpRosServerPublisherConnection<M extends Message> extends
 			// Throw original exception
 			throw ex;
 
-		} catch (RosTransportSerializationException ex) {
+		} catch (RosMessageSerializationException ex) {
 
 			// Throw exception
 			throw new TcpRosHandshakeException("handshake failed", ex);

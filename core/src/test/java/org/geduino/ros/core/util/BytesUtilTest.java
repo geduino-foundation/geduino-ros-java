@@ -26,20 +26,4 @@ public class BytesUtilTest extends BytesTestCase {
 
 	}
 
-	public void testToLittleEndianBytes() {
-
-		// Assert
-		assertBytes(new byte[] { 14, 22, 0, 0 },
-				BytesUtil.toLittleEndianBytes(5646));
-
-	}
-
-	public void testToLittleEndianInt() {
-
-		// Assert
-		assertEquals(5646,
-				BytesUtil.toLittleEndianInt(new byte[] { 14, 22, 0, 0 }));
-
-	}
-
 }

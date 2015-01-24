@@ -6,21 +6,21 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import org.geduino.ros.core.exception.NotYetImplementedException;
-import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
-import org.geduino.ros.core.transport.model.PrimitiveTypeWriter;
+import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
+import org.geduino.ros.core.messages.model.DataWriter;
 import org.geduino.ros.core.util.BytesUtil;
 
-public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
+public class OutputStreamDataWriter implements DataWriter {
 
 	private final OutputStream outputStream;
 
-	public OutputStreamPrimitiveTypeWriter(OutputStream outputStream) {
+	public OutputStreamDataWriter(OutputStream outputStream) {
 		this.outputStream = outputStream;
 	}
 
 	@Override
 	public void writeBool(boolean bool) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = new byte[1];
@@ -38,13 +38,13 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeDuration(long duration) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 		throw new NotYetImplementedException();
 	}
 
 	@Override
 	public void writeFloat32(float float32) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bit
 		int bits = Float.floatToIntBits(float32);
@@ -63,7 +63,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeFloat64(double float64) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bit
 		long bits = Double.doubleToLongBits(float64);
@@ -86,7 +86,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeInt16(int int16) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = new byte[2];
@@ -100,7 +100,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeInt32(int int32) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = new byte[4];
@@ -116,7 +116,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeInt64(long int64) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = new byte[8];
@@ -136,7 +136,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeInt8(int int8) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = new byte[1];
@@ -149,7 +149,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeString(String string) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = string.getBytes();
@@ -161,13 +161,13 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeTime(long time) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 		throw new NotYetImplementedException();
 	}
 
 	@Override
 	public void writeUInt16(int uInt16) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = new byte[2];
@@ -181,7 +181,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeUInt32(long uInt32) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = new byte[4];
@@ -197,7 +197,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeUInt64(BigInteger uInt64) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get big integer bytes
 		byte[] bigIntegerBytes = uInt64.toByteArray();
@@ -220,7 +220,7 @@ public class OutputStreamPrimitiveTypeWriter implements PrimitiveTypeWriter {
 
 	@Override
 	public void writeUInt8(int uInt8) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Get bytes
 		byte[] bytes = new byte[1];

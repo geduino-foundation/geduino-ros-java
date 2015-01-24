@@ -3,8 +3,8 @@ package org.geduino.ros.node;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
 import org.geduino.ros.core.messages.model.Message;
-import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
 import org.geduino.ros.core.transport.model.SubscriberConnection;
 
 class SubscriberConnectionRunnable<T extends Message> implements Runnable {
@@ -42,7 +42,7 @@ class SubscriberConnectionRunnable<T extends Message> implements Runnable {
 				// Log
 				LOGGER.error("could not read message", ex);
 
-			} catch (RosTransportSerializationException ex) {
+			} catch (RosMessageSerializationException ex) {
 
 				// Log
 				LOGGER.error("could not read message", ex);

@@ -5,9 +5,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.UUID;
 
+import org.geduino.ros.core.messages.model.DataReader;
+import org.geduino.ros.core.messages.model.DataWriter;
 import org.geduino.ros.core.transport.model.Connection;
-import org.geduino.ros.core.transport.model.PrimitiveTypeReader;
-import org.geduino.ros.core.transport.model.PrimitiveTypeWriter;
 
 public abstract class SocketConnection implements Connection {
 
@@ -78,23 +78,23 @@ public abstract class SocketConnection implements Connection {
 
 	}
 
-	protected PrimitiveTypeReader getPrimitiveTypeReader() throws IOException {
+	protected DataReader getDataReader() throws IOException {
 
-		// Create primitive type reader
-		PrimitiveTypeReader primitiveTypeReader = new InputStreamPrimitiveTypeReader(
+		// Create data reader
+		DataReader dataReader = new InputStreamDataReader(
 				socket.getInputStream());
 
-		return primitiveTypeReader;
+		return dataReader;
 
 	}
 
-	protected PrimitiveTypeWriter getPrimitiveTypeWriter() throws IOException {
+	protected DataWriter getDataWriter() throws IOException {
 
-		// Create primitive type writer
-		PrimitiveTypeWriter primitiveTypeWriter = new OutputStreamPrimitiveTypeWriter(
+		// Create data writer
+		DataWriter dataWriter = new OutputStreamDataWriter(
 				socket.getOutputStream());
 
-		return primitiveTypeWriter;
+		return dataWriter;
 
 	}
 

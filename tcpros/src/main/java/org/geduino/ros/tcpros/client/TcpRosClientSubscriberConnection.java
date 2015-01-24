@@ -9,11 +9,11 @@ import org.geduino.ros.core.api.model.BusInfo;
 import org.geduino.ros.core.api.model.Direction;
 import org.geduino.ros.core.api.model.SubscriberConnectionData;
 import org.geduino.ros.core.api.model.Transport;
+import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageDetails;
+import org.geduino.ros.core.messages.model.MessageReader;
 import org.geduino.ros.core.naming.model.GlobalName;
-import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
-import org.geduino.ros.core.transport.model.MessageReader;
 import org.geduino.ros.core.transport.model.SubscriberConnection;
 import org.geduino.ros.tcpros.TcpRosConnection;
 import org.geduino.ros.tcpros.exception.TcpRosException;
@@ -137,7 +137,7 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 				LOGGER.error("could not notify handshake error to destination",
 						ex2);
 
-			} catch (RosTransportSerializationException ex2) {
+			} catch (RosMessageSerializationException ex2) {
 
 				// Log
 				LOGGER.error("could not notify handshake error to destination",
@@ -148,7 +148,7 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 			// Throw original exception
 			throw ex;
 
-		} catch (RosTransportSerializationException ex) {
+		} catch (RosMessageSerializationException ex) {
 
 			// Throw exception
 			throw new TcpRosHandshakeException("handshake failed", ex);
@@ -163,7 +163,7 @@ public class TcpRosClientSubscriberConnection<T extends Message> extends
 
 			@Override
 			public T read() throws IOException,
-					RosTransportSerializationException {
+					RosMessageSerializationException {
 
 				return null;
 			}

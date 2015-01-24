@@ -15,10 +15,10 @@ import org.geduino.ros.core.api.model.ProtocolType;
 import org.geduino.ros.core.api.model.PublisherConnectionData;
 import org.geduino.ros.core.api.model.PublisherStat;
 import org.geduino.ros.core.api.model.TcpRosProtocol;
+import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageDetails;
 import org.geduino.ros.core.naming.model.GlobalName;
-import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
 import org.geduino.ros.core.transport.model.ConnectionListener;
 import org.geduino.ros.core.transport.model.PublisherConnection;
 import org.geduino.ros.node.exception.RosPublisherException;
@@ -120,7 +120,8 @@ public class Publisher<M extends Message> implements
 			// Create server config
 			TcpRosServerPublisherConfig<M> tcpRosServerPublisherConfig = new TcpRosServerPublisherConfig<M>(
 					nodeName, 0, 1,
-					new TcpRosServerPublisherConnectionFactory<M>(topic, messageDetails));
+					new TcpRosServerPublisherConnectionFactory<M>(topic,
+							messageDetails));
 			tcpRosServerPublisherConfig.addConnectionListener(this);
 
 			// Create tcp ros server publisher
@@ -178,7 +179,7 @@ public class Publisher<M extends Message> implements
 				LOGGER.error("could not publish message: " + message
 						+ " to connection: " + publisherConnection, ex);
 
-			} catch (RosTransportSerializationException ex) {
+			} catch (RosMessageSerializationException ex) {
 
 				// Log
 				LOGGER.error("could not publish message: " + message

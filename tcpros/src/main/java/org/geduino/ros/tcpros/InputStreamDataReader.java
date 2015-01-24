@@ -5,21 +5,21 @@ import java.io.InputStream;
 import java.math.BigInteger;
 
 import org.geduino.ros.core.exception.NotYetImplementedException;
-import org.geduino.ros.core.transport.exception.RosTransportSerializationException;
-import org.geduino.ros.core.transport.model.PrimitiveTypeReader;
+import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
+import org.geduino.ros.core.messages.model.DataReader;
 import org.geduino.ros.core.util.BytesUtil;
 
-public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
+public class InputStreamDataReader implements DataReader {
 
 	private final InputStream inputStream;
 
-	public InputStreamPrimitiveTypeReader(InputStream inputStream) {
+	public InputStreamDataReader(InputStream inputStream) {
 		this.inputStream = inputStream;
 	}
 
 	@Override
 	public boolean readBool() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(1);
@@ -33,13 +33,13 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public long readDuration() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 		throw new NotYetImplementedException();
 	}
 
 	@Override
 	public float readFloat32() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(4);
@@ -62,7 +62,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public double readFloat64() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(8);
@@ -93,7 +93,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public int readInt16() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(2);
@@ -119,7 +119,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public int readInt32() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(4);
@@ -139,7 +139,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public long readInt64() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(8);
@@ -167,7 +167,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public int readInt8() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(1);
@@ -181,7 +181,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public String readString(int length) throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(length);
@@ -195,13 +195,13 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public long readTime() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 		throw new NotYetImplementedException();
 	}
 
 	@Override
 	public int readUInt16() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(2);
@@ -217,7 +217,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public long readUInt32() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(4);
@@ -237,7 +237,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public BigInteger readUInt64() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(8);
@@ -254,7 +254,7 @@ public class InputStreamPrimitiveTypeReader implements PrimitiveTypeReader {
 
 	@Override
 	public int readUInt8() throws IOException,
-			RosTransportSerializationException {
+			RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(1);

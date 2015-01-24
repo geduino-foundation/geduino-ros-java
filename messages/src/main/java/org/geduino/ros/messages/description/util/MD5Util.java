@@ -7,12 +7,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.geduino.ros.core.messages.model.MessageFieldType;
-import org.geduino.ros.core.messages.model.PrimitiveFieldType;
 import org.geduino.ros.core.naming.model.MessageName;
 import org.geduino.ros.messages.description.exception.RosMessageDescriptionException;
 import org.geduino.ros.messages.description.model.FieldDescription;
 import org.geduino.ros.messages.description.model.MessageDescription;
+import org.geduino.ros.messages.description.model.MessageFieldType;
+import org.geduino.ros.messages.description.model.PrimitiveFieldType;
 
 public class MD5Util {
 

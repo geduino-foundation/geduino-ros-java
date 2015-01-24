@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.geduino.ros.core.messages.model.FieldType;
-import org.geduino.ros.core.messages.model.MessageFieldType;
 import org.geduino.ros.core.naming.model.MessageName;
 import org.geduino.ros.core.util.CollectionFilter;
 

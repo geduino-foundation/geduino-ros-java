@@ -40,6 +40,10 @@
 			<groupId>org.geduino.ros</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.geduino.ros</groupId>
+			<artifactId>messages</artifactId>
+		</dependency>
 	</dependencies>
 
 </project> 
