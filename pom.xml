@@ -132,6 +132,7 @@
 		<module>xmlrpc</module>
 		<module>messages</module>
 		<module>node</module>
+		<module>common-msgs-hydro</module>
 	</modules>
 
 	<!-- ############# Dependencies section ############# -->
@@ -228,6 +229,11 @@
 				<artifactId>node</artifactId>
 				<version>${ros.parent.version}</version>
 			</dependency>
+			<dependency>
+                                <groupId>org.geduino.ros</groupId>
+                                <artifactId>common-msgs-hydro</artifactId>
+                                <version>${ros.parent.version}</version>
+                        </dependency>
 
 		</dependencies>
 	</dependencyManagement>
