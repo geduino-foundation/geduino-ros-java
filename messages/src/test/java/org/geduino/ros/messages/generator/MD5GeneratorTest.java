@@ -1,4 +1,4 @@
-package org.geduino.ros.messages.description.util;
+package org.geduino.ros.messages.generator;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +13,9 @@ import org.geduino.ros.core.naming.model.Name;
 import org.geduino.ros.messages.description.exception.RosMessageDescriptionException;
 import org.geduino.ros.messages.description.loader.MessageDescriptionsLoader;
 import org.geduino.ros.messages.description.model.MessageDescription;
+import org.geduino.ros.messages.generator.exception.RosMessageGeneratorException;
 
-public class MD5UtilTest extends TestCase {
+public class MD5GeneratorTest extends TestCase {
 
 	private static final Map<MessageName, String> EXPECTED_MD5 = new HashMap<MessageName, String>();
 	static {
@@ -84,7 +85,8 @@ public class MD5UtilTest extends TestCase {
 				"82373f1612381bb6ee473b5cd6f5d89c");
 	}
 
-	public void test() throws RosMessageDescriptionException, IOException {
+	public void test() throws IOException, RosMessageGeneratorException,
+			RosMessageDescriptionException {
 
 		// Load message descriptions
 		Map<MessageName, MessageDescription> messageDescriptions = MessageDescriptionsLoader
@@ -97,7 +99,7 @@ public class MD5UtilTest extends TestCase {
 			MessageDescription messageDescription = iterator.next();
 
 			// Get md5
-			String md5 = MD5Util.computeMD5(messageDescription,
+			String md5 = MD5Generator.generate(messageDescription,
 					messageDescriptions);
 
 			// Get expected md5

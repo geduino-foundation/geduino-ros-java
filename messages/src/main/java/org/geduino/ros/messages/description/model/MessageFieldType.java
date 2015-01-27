@@ -46,6 +46,5 @@ public class MessageFieldType implements FieldType {
 	public String toString() {
 		return messageName.toString();
 	}
-	
-}
 
+}

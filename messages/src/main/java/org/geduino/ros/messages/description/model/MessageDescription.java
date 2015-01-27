@@ -15,18 +15,24 @@ public class MessageDescription implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private final MessageName name;
+	private final String comment;
 	private final List<FieldDescription> fieldDescriptions;
 
-	public MessageDescription(MessageName name,
+	public MessageDescription(MessageName name, String comment,
 			List<FieldDescription> fieldDescriptions) {
 
 		this.name = name;
+		this.comment = comment;
 		this.fieldDescriptions = fieldDescriptions;
 
 	}
 
 	public MessageName getName() {
 		return name;
+	}
+
+	public String getComment() {
+		return comment;
 	}
 
 	public List<FieldDescription> getFieldDescriptions() {

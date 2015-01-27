@@ -1,4 +1,4 @@
-package org.geduino.ros.messages.description.util;
+package org.geduino.ros.messages.generator;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -8,17 +8,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.geduino.ros.core.naming.model.MessageName;
-import org.geduino.ros.messages.description.exception.RosMessageDescriptionException;
 import org.geduino.ros.messages.description.model.FieldDescription;
 import org.geduino.ros.messages.description.model.MessageDescription;
 import org.geduino.ros.messages.description.model.MessageFieldType;
 import org.geduino.ros.messages.description.model.PrimitiveFieldType;
+import org.geduino.ros.messages.generator.exception.RosMessageGeneratorException;
 
-public class MD5Util {
+class MD5Generator {
 
-	public static String computeMD5(MessageDescription messageDescription,
+	static String generate(MessageDescription messageDescription,
 			Map<MessageName, MessageDescription> messageDescriptions)
-			throws RosMessageDescriptionException {
+			throws RosMessageGeneratorException {
 
 		// Get md5 text
 		String md5Text = getMD5Text(messageDescription, messageDescriptions);
@@ -39,7 +39,7 @@ public class MD5Util {
 		} catch (NoSuchAlgorithmException ex) {
 
 			// Throw exception
-			throw new RosMessageDescriptionException("could not compute md5",
+			throw new RosMessageGeneratorException("could not compute md5",
 					ex);
 
 		}
@@ -48,7 +48,7 @@ public class MD5Util {
 
 	private static String getMD5Text(MessageDescription messageDescription,
 			Map<MessageName, MessageDescription> messageDescriptions)
-			throws RosMessageDescriptionException {
+			throws RosMessageGeneratorException {
 
 		StringBuffer md5TextStringBuffer = new StringBuffer();
 
@@ -63,7 +63,7 @@ public class MD5Util {
 			FieldDescription fieldDescription = iterator.next();
 
 			// Get md5 text
-			String md5Text = MD5Util.getMD5Text(fieldDescription,
+			String md5Text = MD5Generator.getMD5Text(fieldDescription,
 					messageDescriptions);
 
 			// Add md5 text
@@ -88,7 +88,7 @@ public class MD5Util {
 			FieldDescription fieldDescription = iterator.next();
 
 			// Get md5 text
-			String md5Text = MD5Util.getMD5Text(fieldDescription,
+			String md5Text = MD5Generator.getMD5Text(fieldDescription,
 					messageDescriptions);
 
 			// Add md5 text
@@ -103,7 +103,7 @@ public class MD5Util {
 
 	private static String getMD5Text(FieldDescription fieldDescription,
 			Map<MessageName, MessageDescription> messageDescriptions)
-			throws RosMessageDescriptionException {
+			throws RosMessageGeneratorException {
 
 		if (fieldDescription.isConstant()) {
 
@@ -144,7 +144,7 @@ public class MD5Util {
 				if (messageDescription != null) {
 
 					// Compute md5
-					String md5 = computeMD5(messageDescription,
+					String md5 = generate(messageDescription,
 							messageDescriptions);
 
 					// Compute md5text
@@ -156,7 +156,7 @@ public class MD5Util {
 				} else {
 
 					// Throw exception
-					throw new RosMessageDescriptionException(
+					throw new RosMessageGeneratorException(
 							"missing dependency: " + messageName);
 
 				}
@@ -164,7 +164,7 @@ public class MD5Util {
 			} else {
 
 				// Throw exception
-				throw new RosMessageDescriptionException("unknow field type: "
+				throw new RosMessageGeneratorException("unknow field type: "
 						+ fieldDescription.getType());
 
 			}
