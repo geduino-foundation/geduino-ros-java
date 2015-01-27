@@ -11,6 +11,7 @@ import org.geduino.ros.core.api.model.Direction;
 import org.geduino.ros.core.api.model.PublisherConnectionData;
 import org.geduino.ros.core.api.model.Transport;
 import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
+import org.geduino.ros.core.messages.model.DataWriter;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageDetails;
 import org.geduino.ros.core.messages.model.MessageWriter;
@@ -173,8 +174,26 @@ public class TcpRosServerPublisherConnection<M extends Message> extends
 
 	@Override
 	public MessageWriter<M> getMessageWriter() {
-		// TODO Auto-generated method stub
-		return null;
+
+		return new MessageWriter<M>() {
+
+			@Override
+			public void write(M message) throws IOException,
+					RosMessageSerializationException {
+
+				// Get data writer
+				DataWriter dataWriter = getDataWriter();
+
+				// Write message length
+				dataWriter.writeUInt32(message.getLength());
+
+				// Serialize message
+				message.serialize(dataWriter);
+
+			}
+
+		};
+
 	}
 
 }
