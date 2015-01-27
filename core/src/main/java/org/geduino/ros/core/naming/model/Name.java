@@ -196,7 +196,7 @@ public abstract class Name implements Named {
 		if (index != -1) {
 
 			// Get last child
-			Name lastChild = parseName(name.substring(index));
+			Name lastChild = parseName(name.substring(index + 1));
 
 			return lastChild;
 
