@@ -7,13 +7,15 @@ public class MessageDetails<T> {
 	private final MessageName messageName;
 	private final String messageMd5sum;
 	private final String messageDefinition;
+	private final Class<T> messageClass;
 
 	public MessageDetails(MessageName messageName, String messageMd5sum,
-			String messageDefinition) {
+			String messageDefinition, Class<T> messageClass) {
 
 		this.messageName = messageName;
 		this.messageMd5sum = messageMd5sum;
 		this.messageDefinition = messageDefinition;
+		this.messageClass = messageClass;
 
 	}
 
@@ -27,6 +29,10 @@ public class MessageDetails<T> {
 
 	public String getMessageDefinition() {
 		return messageDefinition;
+	}
+
+	public Class<T> getMessageClass() {
+		return messageClass;
 	}
 
 }
