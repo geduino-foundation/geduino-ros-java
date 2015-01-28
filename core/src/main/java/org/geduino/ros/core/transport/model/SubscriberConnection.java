@@ -1,5 +1,7 @@
 package org.geduino.ros.core.transport.model;
 
+import java.io.IOException;
+
 import org.geduino.ros.core.api.model.SubscriberConnectionData;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageReader;
@@ -9,6 +11,6 @@ public interface SubscriberConnection<T extends Message> extends
 
 	SubscriberConnectionData getSubscriberConnectionData();
 
-	MessageReader<T> getMessageReader();
+	MessageReader<T> getMessageReader() throws IOException;
 
 }
