@@ -89,25 +89,28 @@ public class MD5GeneratorTest extends TestCase {
 			RosMessageDescriptionException {
 
 		// Load message descriptions
-		Map<MessageName, MessageDescription> messageDescriptions = MessageDescriptionsLoader
+		Map<MessageName, MessageDescription> messageDescriptionMap = MessageDescriptionsLoader
 				.load(new File("src/test/resources/org/geduino/ros/messages"));
 
-		for (Iterator<MessageDescription> iterator = messageDescriptions
+		// Create md5 generator
+		MD5Generator md5Generator = new MD5Generator(messageDescriptionMap);
+
+		for (Iterator<MessageDescription> iterator = messageDescriptionMap
 				.values().iterator(); iterator.hasNext();) {
 
 			// Get message description
 			MessageDescription messageDescription = iterator.next();
 
 			// Get md5
-			String md5 = MD5Generator.generate(messageDescription,
-					messageDescriptions);
+			String md5 = md5Generator.generate(messageDescription);
 
 			// Get expected md5
 			String expectedMd5 = EXPECTED_MD5.get(messageDescription.getName());
 
 			// Asserts
 			assertNotNull(expectedMd5);
-			assertEquals("msg: " + messageDescription.getName(), expectedMd5, md5);
+			assertEquals("msg: " + messageDescription.getName(), expectedMd5,
+					md5);
 
 		}
 

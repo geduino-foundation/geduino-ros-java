@@ -1,7 +1,5 @@
 package org.geduino.ros.messages.generator;
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.geduino.ros.core.messages.model.MessageDetails;
 import org.geduino.ros.core.naming.model.MessageName;
@@ -16,23 +14,29 @@ import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JMod;
 
-class MessageDetailsFieldGenerator {
+class DetailsFieldGenerator {
 
 	private static final Logger LOGGER = Logger
-			.getLogger(MessageDetailsFieldGenerator.class);
+			.getLogger(DetailsFieldGenerator.class);
 
-	static void generate(JCodeModel jCodeModel, JDefinedClass jDefinedClass,
-			MessageDescription messageDescription,
-			Map<MessageName, MessageDescription> messageDescriptions)
-			throws RosMessageGeneratorException {
+	private final JCodeModel jCodeModel;
+	private final MD5Generator md5Generator;
+
+	public DetailsFieldGenerator(JCodeModel jCodeModel,
+			MD5Generator md5Generator) {
+		this.jCodeModel = jCodeModel;
+		this.md5Generator = md5Generator;
+	}
+
+	void generate(MessageDescription messageDescription,
+			JDefinedClass jDefinedClass) throws RosMessageGeneratorException {
 
 		// Log
-		LOGGER.trace("adding serialize(DataWriter) method...");
+		LOGGER.trace("adding DETAILS field...");
 
 		// Get message name, md5 sum and message definition
 		MessageName messageName = messageDescription.getName();
-		String md5sum = MD5Generator.generate(messageDescription,
-				messageDescriptions);
+		String md5sum = md5Generator.generate(messageDescription);
 		String messageDefinition = messageName.getLastChild().toString()
 				.concat(" message");
 
@@ -46,13 +50,17 @@ class MessageDetailsFieldGenerator {
 				"parseMessageName").arg(JExpr.lit(messageName.toString()));
 
 		// Add message details field
-		jDefinedClass.field(JMod.PUBLIC + JMod.STATIC + JMod.FINAL,
-				messageDetailsJClass, "DETAILS").init(
-				JExpr._new(messageDetailsJClass).arg(messageNameJExpression)
+		jDefinedClass
+				.field(JMod.PUBLIC + JMod.STATIC + JMod.FINAL,
+						messageDetailsJClass, "DETAILS")
+				.init(JExpr
+						._new(messageDetailsJClass)
+						.arg(messageNameJExpression)
 						.arg(JExpr.lit(md5sum))
 						.arg(JExpr.lit(messageDefinition))
-						.arg(JExpr.direct(jDefinedClass.name().concat(".class"))));
-
+						.arg(JExpr
+								.direct(jDefinedClass.name().concat(".class"))));
+		
 	}
 
 }

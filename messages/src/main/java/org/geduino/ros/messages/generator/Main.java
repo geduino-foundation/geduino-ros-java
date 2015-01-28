@@ -25,7 +25,7 @@ public class Main {
 
 			// Print usage
 			System.out
-					.println("Usage: java -jar messages-X.Y.Z <msg source folder> <msg target folder> <msg class package>");
+					.println("usage: java -jar messages-X.Y.Z <msg source folder> <msg target folder> <msg class package>");
 
 			// Throw exception
 			throw new RosMessageGeneratorException("invalid arguments length");
@@ -113,15 +113,8 @@ public class Main {
 			String javaPackage, File messageTargetFolder)
 			throws RosMessageGeneratorException, IOException {
 
-		// Create code model
-		JCodeModel jCodeModel = new JCodeModel();
-
-		// Create message classes generator
-		MessageClassesGenerator messageClassesGenerator = new MessageClassesGenerator(
-				jCodeModel, javaPackage, messageDescriptionMap);
-
 		// Generate message classes
-		messageClassesGenerator.generate();
+		JCodeModel jCodeModel = ClassesGenerator.generate(messageDescriptionMap, javaPackage);
 
 		if (!messageTargetFolder.exists()) {
 

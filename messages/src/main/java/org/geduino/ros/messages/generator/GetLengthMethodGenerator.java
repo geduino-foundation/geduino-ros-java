@@ -1,22 +1,17 @@
 package org.geduino.ros.messages.generator;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.geduino.ros.core.messages.model.DataType;
-import org.geduino.ros.messages.description.model.FieldDescription;
 import org.geduino.ros.messages.description.model.FieldType;
 import org.geduino.ros.messages.description.model.MessageFieldType;
 import org.geduino.ros.messages.description.model.PrimitiveFieldType;
 import org.geduino.ros.messages.generator.exception.RosMessageGeneratorException;
 
-import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JExpression;
-import com.sun.codemodel.JFieldRef;
+import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JForLoop;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
@@ -27,82 +22,75 @@ class GetLengthMethodGenerator {
 	private static final Logger LOGGER = Logger
 			.getLogger(GetLengthMethodGenerator.class);
 
-	static void generate(JCodeModel jCodeModel, JDefinedClass jDefinedClass,
-			List<FieldDescription> fieldDescriptions)
-			throws RosMessageGeneratorException {
+	private final JCodeModel jCodeModel;
+	private final JMethod getLengthJMethod;
+	private final JVar lengthJVar;
+
+	GetLengthMethodGenerator(JCodeModel jCodeModel, JDefinedClass jDefinedClass) {
+
+		this.jCodeModel = jCodeModel;
 
 		// Log
 		LOGGER.trace("adding getLength() method...");
 
 		// Create get length method
-		JMethod getLengthJMethod = jDefinedClass.method(JMod.PUBLIC,
-				long.class, "getLength");
+		getLengthJMethod = jDefinedClass.method(JMod.PUBLIC, long.class,
+				"getLength");
 		getLengthJMethod.annotate(Override.class);
 
 		// Init length var
-		JVar lengthJVar = getLengthJMethod.body().decl(jCodeModel.LONG,
-				"length", JExpr.lit(0));
-
-		for (Iterator<FieldDescription> iterator = fieldDescriptions.iterator(); iterator
-				.hasNext();) {
-
-			// Get next field description
-			FieldDescription fieldDescription = iterator.next();
-
-			if (!fieldDescription.isConstant()) {
-
-				// Generate field length statement
-				generateFieldLengthStatement(jCodeModel,
-						getLengthJMethod.body(), lengthJVar, fieldDescription);
-
-			}
-
-		}
-
-		// Add return
-		getLengthJMethod.body()._return(lengthJVar);
+		lengthJVar = getLengthJMethod.body().decl(jCodeModel.LONG, "length",
+				JExpr.lit(0));
 
 	}
 
-	private static void generateFieldLengthStatement(JCodeModel jCodeModel,
-			JBlock jBlock, JVar lengthJVar, FieldDescription fieldDescription)
+	void generate(FieldType fieldType, JFieldVar jFieldVar)
 			throws RosMessageGeneratorException {
 
-		// Get reference to field variable
-		JFieldRef jFieldRef = JExpr.ref(fieldDescription.getName());
+		// Log
+		LOGGER.trace("adding " + jFieldVar.name() + " length...");
 
-		if (fieldDescription.isArray()) {
+		// Add non-javadoc comment
+		getLengthJMethod.body().directStatement(
+				"// Adding " + jFieldVar.name() + " length");
+
+		if (jFieldVar.type().isArray()) {
 
 			// Create for loop
-			jBlock.assignPlus(lengthJVar, JExpr.lit(4));
-			JForLoop jForLoop = jBlock._for();
+			getLengthJMethod.body().assignPlus(lengthJVar, JExpr.lit(4));
+			JForLoop jForLoop = getLengthJMethod.body()._for();
 			JVar indexJVar = jForLoop.init(jCodeModel.INT, "index",
 					JExpr.lit(0));
-			jForLoop.test(indexJVar.lt(jFieldRef.ref("length")));
+			jForLoop.test(indexJVar.lt(jFieldVar.ref("length")));
 			jForLoop.update(indexJVar.incr());
-			jForLoop.body()
-					.assignPlus(
-							lengthJVar,
-							generateFieldLengthExpression(jCodeModel, jFieldRef.component(indexJVar),
-									fieldDescription));
+			jForLoop.body().assignPlus(
+					lengthJVar,
+					getComponentLengthExpression(fieldType,
+							jFieldVar.component(indexJVar)));
 
 		} else {
 
 			// Add field length statement
-			jBlock.assignPlus(lengthJVar,
-					generateFieldLengthExpression(jCodeModel, jFieldRef, fieldDescription));
+			getLengthJMethod.body().assignPlus(lengthJVar,
+					getComponentLengthExpression(fieldType, jFieldVar));
 
 		}
 
 	}
 
-	private static JExpression generateFieldLengthExpression(
-			JCodeModel jCodeModel, JExpression toAddJExpression,
-			FieldDescription fieldDescription)
-			throws RosMessageGeneratorException {
+	void generateReturnStatement() throws RosMessageGeneratorException {
 
-		// Get field type
-		FieldType fieldType = fieldDescription.getType();
+		// Log
+		LOGGER.trace("adding return statement...");
+				
+		// Add return
+		getLengthJMethod.body()._return(lengthJVar);
+				
+	}
+
+	private JExpression getComponentLengthExpression(FieldType fieldType,
+			JExpression componentJExpression)
+			throws RosMessageGeneratorException {
 
 		if (fieldType instanceof PrimitiveFieldType) {
 
@@ -113,16 +101,15 @@ class GetLengthMethodGenerator {
 			DataType dataType = primitiveFieldType.getDataType();
 
 			// Generate expression
-			JExpression jExpression = generatePrimitiveTypeFieldLengthExpression(
-					jCodeModel, dataType, toAddJExpression);
+			JExpression jExpression = getComponentLengthExpression(
+					dataType, componentJExpression);
 
 			return jExpression;
 
 		} else if (fieldType instanceof MessageFieldType) {
 
 			// Generate expression
-			JExpression jExpression = generateMessageTypeFieldLengthExpression(
-					jCodeModel, toAddJExpression);
+			JExpression jExpression = getComponentLengthExpression(componentJExpression);
 
 			return jExpression;
 
@@ -136,14 +123,15 @@ class GetLengthMethodGenerator {
 
 	}
 
-	private static JExpression generatePrimitiveTypeFieldLengthExpression(
-			JCodeModel jCodeModel, DataType dataType, JExpression toAddJExpression)
+	private JExpression getComponentLengthExpression(DataType dataType,
+			JExpression componentJExpression)
 			throws RosMessageGeneratorException {
 
 		if (DataType.STRING.equals(dataType)) {
 
 			// Get expression
-			JExpression jExpression = toAddJExpression.invoke("length").plus(JExpr.lit(4));
+			JExpression jExpression = componentJExpression.invoke("length")
+					.plus(JExpr.lit(4));
 
 			return jExpression;
 
@@ -158,12 +146,12 @@ class GetLengthMethodGenerator {
 
 	}
 
-	private static JExpression generateMessageTypeFieldLengthExpression(
-			JCodeModel jCodeModel, JExpression toAddJExpression)
+	private JExpression getComponentLengthExpression(
+			JExpression componentJExpression)
 			throws RosMessageGeneratorException {
 
 		// Get expression
-		JExpression jExpression = toAddJExpression.invoke("getLength");
+		JExpression jExpression = componentJExpression.invoke("getLength");
 
 		return jExpression;
 
