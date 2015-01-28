@@ -5,8 +5,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.UUID;
 
-import org.geduino.ros.core.messages.model.DataReader;
-import org.geduino.ros.core.messages.model.DataWriter;
 import org.geduino.ros.core.transport.model.Connection;
 
 public abstract class SocketConnection implements Connection {
@@ -15,10 +13,8 @@ public abstract class SocketConnection implements Connection {
 
 	private final String id;
 
-	private int byteSent;
-	private int numSent;
-	private int byteReceived;
-	private int numReceived;
+	private InputStreamDataReader inputStreamDataReader;
+	private OutputStreamDataWriter outputStreamDataWriter;
 
 	public SocketConnection(Socket socket) {
 
@@ -46,19 +42,11 @@ public abstract class SocketConnection implements Connection {
 	}
 
 	public int getByteSent() {
-		return byteSent;
-	}
-
-	public int getNumSent() {
-		return numSent;
+		return (outputStreamDataWriter == null) ? 0 : outputStreamDataWriter.getByteSent();
 	}
 
 	public int getByteReceived() {
-		return byteReceived;
-	}
-
-	public int getNumReceived() {
-		return numReceived;
+		return (inputStreamDataReader == null) ? 0 : inputStreamDataReader.getByteReceived();
 	}
 
 	public boolean getTcpNoDelay() throws SocketException {
@@ -78,23 +66,31 @@ public abstract class SocketConnection implements Connection {
 
 	}
 
-	protected DataReader getDataReader() throws IOException {
+	protected InputStreamDataReader getDataReader() throws IOException {
 
-		// Create data reader
-		DataReader dataReader = new InputStreamDataReader(
-				socket.getInputStream());
+		if (inputStreamDataReader == null) {
 
-		return dataReader;
+			// Create data reader
+			inputStreamDataReader = new InputStreamDataReader(
+					socket.getInputStream());
+
+		}
+
+		return inputStreamDataReader;
 
 	}
 
-	protected DataWriter getDataWriter() throws IOException {
+	protected OutputStreamDataWriter getDataWriter() throws IOException {
 
-		// Create data writer
-		DataWriter dataWriter = new OutputStreamDataWriter(
-				socket.getOutputStream());
+		if (outputStreamDataWriter == null) {
 
-		return dataWriter;
+			// Create data writer
+			outputStreamDataWriter = new OutputStreamDataWriter(
+					socket.getOutputStream());
+
+		}
+
+		return outputStreamDataWriter;
 
 	}
 

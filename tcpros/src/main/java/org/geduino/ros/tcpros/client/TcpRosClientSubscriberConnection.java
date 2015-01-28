@@ -10,13 +10,13 @@ import org.geduino.ros.core.api.model.Direction;
 import org.geduino.ros.core.api.model.SubscriberConnectionData;
 import org.geduino.ros.core.api.model.Transport;
 import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
-import org.geduino.ros.core.messages.model.DataReader;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageDetails;
 import org.geduino.ros.core.messages.model.MessageReader;
 import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.core.transport.model.SubscriberConnection;
 import org.geduino.ros.tcpros.TcpRosConnection;
+import org.geduino.ros.tcpros.TcpRosMessageReader;
 import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
 import org.geduino.ros.tcpros.model.ConnectionHeader;
@@ -30,6 +30,8 @@ public class TcpRosClientSubscriberConnection<M extends Message> extends
 	private final GlobalName topic;
 	private final MessageDetails<M> messageDetails;
 
+	private TcpRosMessageReader<M> tcpRosMessageReader;
+	
 	public TcpRosClientSubscriberConnection(GlobalName callerId, Socket socket,
 			GlobalName topic, MessageDetails<M> messageDetails)
 			throws TcpRosException, IOException {
@@ -159,57 +161,17 @@ public class TcpRosClientSubscriberConnection<M extends Message> extends
 	}
 
 	@Override
-	public MessageReader<M> getMessageReader() {
-		return new MessageReader<M>() {
+	public MessageReader<M> getMessageReader() throws IOException {
 
-			@Override
-			public M read() throws IOException,
-					RosMessageSerializationException {
+		if (tcpRosMessageReader == null) {
+		
+			// Create message reader
+		    tcpRosMessageReader = new TcpRosMessageReader<M>(messageDetails.getMessageClass(), getDataReader());
 
-				// Get message class
-				Class<M> messageClass = messageDetails.getMessageClass();
-
-				try {
-
-					// Create new message instance
-					M message = newMessageInstance(messageClass);
-
-					// Get data reader
-					DataReader dataReader = getDataReader();
-
-					// Deserializ<e message
-					message.deserialize(dataReader);
-
-					return message;
-
-				} catch (InstantiationException ex) {
-
-					// Throw exception
-					throw new RosMessageSerializationException(
-							"could not read message", ex);
-
-				} catch (IllegalAccessException ex) {
-
-					// Throw exception
-					throw new RosMessageSerializationException(
-							"could not read message", ex);
-
-				}
-
-			}
-
-			private M newMessageInstance(Class<M> messageClass)
-					throws InstantiationException, IllegalAccessException {
-
-				// Create new message instance
-				M message = messageClass.newInstance();
-
-				return message;
-
-			}
-
-		};
-
+		}
+		
+		return tcpRosMessageReader;
+		
 	}
 
 	@Override

@@ -14,7 +14,6 @@ import org.geduino.ros.core.api.model.Protocol;
 import org.geduino.ros.core.api.model.TcpRosProtocol;
 import org.geduino.ros.core.api.model.Transport;
 import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
-import org.geduino.ros.core.messages.model.DataReader;
 import org.geduino.ros.core.messages.model.DataWriter;
 import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.tcpros.exception.TcpRosException;
@@ -142,74 +141,61 @@ public abstract class TcpRosConnection extends SocketConnection {
 			RosMessageSerializationException {
 
 		// Get data reader
-		DataReader dataReader = getDataReader();
+		InputStreamDataReader dataReader = getDataReader();
 
 		// Create connection header
 		ConnectionHeader connectionHeader = new ConnectionHeader();
 
-		// Init read bytes
-		int readBytes = 0;
-
-		// Log
-		LOGGER.trace("reading 4 bytes header length...");
-
 		// Get header length and total header length (including header length 4
 		// bytes)
-		int headerLength = dataReader.readInt32();
-		int totalHeaderLength = headerLength + 4;
-
-		// Increase read bytes
-		readBytes += 4;
+		int headerLength = (int) dataReader.readUInt32();
 
 		// Log
 		LOGGER.trace("reading " + headerLength + " header bytes...");
 
-		while (readBytes < totalHeaderLength) {
+		try {
 
-			// Log
-			LOGGER.trace("reading 4 bytes field length...");
+			// Reset byte limit
+			dataReader.resetByteLimit(headerLength);
 
-			// Get next field length
-			int fieldLength = dataReader.readInt32();
+			while (dataReader.getByteLimit() > 0) {
 
-			// Increase read bytes
-			readBytes += 4;
+				// Get next field length
+				int fieldLength = dataReader.readInt32();
 
-			// Log
-			LOGGER.trace("reading " + fieldLength + " bytes field...");
+				// Get next field string
+				String fieldString = dataReader.readString(fieldLength);
 
-			// Get next field string
-			String fieldString = dataReader.readString(fieldLength);
+				// Get equals index
+				int equalsIndex = fieldString.indexOf("=");
 
-			// Increase read bytes
-			readBytes += fieldLength;
+				if (equalsIndex != -1) {
 
-			// Get equals index
-			int equalsIndex = fieldString.indexOf("=");
+					// Get key and value
+					String key = fieldString.substring(0, equalsIndex);
+					String value = fieldString.substring(equalsIndex + 1);
 
-			if (equalsIndex != -1) {
+					// Add field
+					connectionHeader.put(key, value);
 
-				// Get key and value
-				String key = fieldString.substring(0, equalsIndex);
-				String value = fieldString.substring(equalsIndex + 1);
+				} else {
 
-				// Add field
-				connectionHeader.put(key, value);
+					// Throw exception
+					throw new RosMessageSerializationException(
+							"field string must contain equals: " + fieldString);
 
-			} else {
-
-				// Throw exception
-				throw new RosMessageSerializationException(
-						"field string must contain equals: " + fieldString);
+				}
 
 			}
 
-			// Log
-			LOGGER.trace("read " + readBytes + " of " + totalHeaderLength);
+			return connectionHeader;
+
+		} finally {
+
+			// Reset byte limit
+			dataReader.resetByteLimit();
 
 		}
-
-		return connectionHeader;
 
 	}
 
@@ -224,19 +210,12 @@ public abstract class TcpRosConnection extends SocketConnection {
 		// bytes)
 		int headerLength = ConnectionHeaderUtil
 				.getHeaderLength(connectionHeader);
-		int totalHeaderLength = headerLength + 4;
-
-		// Init wrote bytes
-		int wroteBytes = 0;
-
-		// Log
-		LOGGER.trace("writing 4 bytes header length...");
 
 		// Write header length
 		dataWriter.writeInt32(headerLength);
 
-		// Increase wrote bytes
-		wroteBytes += 4;
+		// Log
+		LOGGER.trace("writing " + headerLength + " header bytes...");
 
 		// Get fields set
 		Set<Map.Entry<String, String>> fieldSet = connectionHeader.fieldSet();
@@ -250,28 +229,13 @@ public abstract class TcpRosConnection extends SocketConnection {
 			// Get field length
 			int fieldLength = ConnectionHeaderUtil.getFieldLength(field);
 
-			// Log
-			LOGGER.trace("writing 4 bytes field length...");
-
 			// Write field length
 			dataWriter.writeInt32(fieldLength);
-
-			// Increase wrote bytes
-			wroteBytes += 4;
-
-			// Log
-			LOGGER.trace("writing " + fieldLength + " bytes field...");
 
 			// Write key
 			dataWriter.writeString(field.getKey());
 			dataWriter.writeString("=");
 			dataWriter.writeString(field.getValue());
-
-			// Increase wrote bytes
-			wroteBytes += fieldLength;
-
-			// Log
-			LOGGER.trace("wrote " + wroteBytes + " of " + totalHeaderLength);
 
 		}
 

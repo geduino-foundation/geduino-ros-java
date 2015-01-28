@@ -5,17 +5,29 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import org.geduino.ros.core.exception.NotYetImplementedException;
+import org.apache.log4j.Logger;
 import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
 import org.geduino.ros.core.messages.model.DataWriter;
+import org.geduino.ros.core.messages.model.Duration;
+import org.geduino.ros.core.messages.model.Time;
 import org.geduino.ros.core.util.BytesUtil;
 
 public class OutputStreamDataWriter implements DataWriter {
 
+	private static final Logger LOGGER = Logger
+			.getLogger(OutputStreamDataWriter.class);
+
 	private final OutputStream outputStream;
 
+	private int byteSent;
+
 	public OutputStreamDataWriter(OutputStream outputStream) {
+
 		this.outputStream = outputStream;
+
+		// Set byte send to zero
+		byteSent = 0;
+
 	}
 
 	@Override
@@ -37,9 +49,15 @@ public class OutputStreamDataWriter implements DataWriter {
 	}
 
 	@Override
-	public void writeDuration(long duration) throws IOException,
+	public void writeDuration(Duration duration) throws IOException,
 			RosMessageSerializationException {
-		throw new NotYetImplementedException();
+
+		// Get duration long
+		long durationLong = duration.getDuration();
+
+		// Write duration as int32
+		writeInt32((int) durationLong);
+
 	}
 
 	@Override
@@ -160,9 +178,15 @@ public class OutputStreamDataWriter implements DataWriter {
 	}
 
 	@Override
-	public void writeTime(long time) throws IOException,
+	public void writeTime(Time time) throws IOException,
 			RosMessageSerializationException {
-		throw new NotYetImplementedException();
+
+		// Get duration time
+		long durationTime = time.getTime();
+
+		// Write duration as uint32
+		writeUInt32(durationTime);
+
 	}
 
 	@Override
@@ -228,6 +252,23 @@ public class OutputStreamDataWriter implements DataWriter {
 
 		// Write bytes
 		outputStream.write(bytes);
+
+	}
+
+	public int getByteSent() {
+		return byteSent;
+	}
+
+	protected void write(byte[] bytes) throws IOException {
+
+		// Log
+		LOGGER.trace("writing " + bytes.length + " bytes...");
+
+		// Write bytes
+		outputStream.write(bytes);
+
+		// Increase byte sent
+		byteSent += bytes.length;
 
 	}
 

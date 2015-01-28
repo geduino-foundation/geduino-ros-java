@@ -4,17 +4,32 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 
-import org.geduino.ros.core.exception.NotYetImplementedException;
+import org.apache.log4j.Logger;
 import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
 import org.geduino.ros.core.messages.model.DataReader;
+import org.geduino.ros.core.messages.model.Duration;
+import org.geduino.ros.core.messages.model.Time;
 import org.geduino.ros.core.util.BytesUtil;
 
 public class InputStreamDataReader implements DataReader {
 
+	private static final Logger LOGGER = Logger.getLogger(InputStreamDataReader.class);
+	
 	private final InputStream inputStream;
-
+	
+	private int byteReceived;
+	private int byteLimit;
+	
 	public InputStreamDataReader(InputStream inputStream) {
+		
 		this.inputStream = inputStream;
+		
+		// Set byte received to zero
+		byteReceived = 0;
+		
+		// Set byte limit to max value
+		byteLimit = Integer.MAX_VALUE;
+		
 	}
 
 	@Override
@@ -32,9 +47,17 @@ public class InputStreamDataReader implements DataReader {
 	}
 
 	@Override
-	public long readDuration() throws IOException,
+	public Duration readDuration() throws IOException,
 			RosMessageSerializationException {
-		throw new NotYetImplementedException();
+
+		// Read duration as int32
+		int durationInt = readInt32();
+
+		// Get duration
+		Duration duration = new Duration(durationInt);
+
+		return duration;
+
 	}
 
 	@Override
@@ -92,8 +115,7 @@ public class InputStreamDataReader implements DataReader {
 	}
 
 	@Override
-	public int readInt16() throws IOException,
-			RosMessageSerializationException {
+	public int readInt16() throws IOException, RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(2);
@@ -118,8 +140,7 @@ public class InputStreamDataReader implements DataReader {
 	}
 
 	@Override
-	public int readInt32() throws IOException,
-			RosMessageSerializationException {
+	public int readInt32() throws IOException, RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(4);
@@ -166,8 +187,7 @@ public class InputStreamDataReader implements DataReader {
 	}
 
 	@Override
-	public int readInt8() throws IOException,
-			RosMessageSerializationException {
+	public int readInt8() throws IOException, RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(1);
@@ -194,9 +214,16 @@ public class InputStreamDataReader implements DataReader {
 	}
 
 	@Override
-	public long readTime() throws IOException,
-			RosMessageSerializationException {
-		throw new NotYetImplementedException();
+	public Time readTime() throws IOException, RosMessageSerializationException {
+
+		// Read duration as uint32
+		long timeLong = readUInt32();
+
+		// Get time
+		Time time = new Time(timeLong);
+
+		return time;
+
 	}
 
 	@Override
@@ -253,8 +280,7 @@ public class InputStreamDataReader implements DataReader {
 	}
 
 	@Override
-	public int readUInt8() throws IOException,
-			RosMessageSerializationException {
+	public int readUInt8() throws IOException, RosMessageSerializationException {
 
 		// Read bytes
 		byte[] bytes = read(1);
@@ -265,9 +291,35 @@ public class InputStreamDataReader implements DataReader {
 		return intValue;
 
 	}
+	
+	public int getByteReceived() {
+		return byteReceived;
+	}
+
+	public void resetByteLimit() {
+		byteLimit = Integer.MAX_VALUE;
+	}
+	
+	public void resetByteLimit(int byteLimit) {
+		this.byteLimit = byteLimit;
+	}
+	
+	public int getByteLimit() {
+		return byteLimit;
+	}
 
 	protected byte[] read(int length) throws IOException {
 
+		if (length > byteLimit) {
+			
+			// Throw exception
+			throw new IOException("cannot read: " + length + " bytes, limit is: " + byteLimit);
+			
+		}
+		
+		// Log
+		LOGGER.trace("reading " + length + " bytes...");
+					
 		byte[] bytes = new byte[length];
 
 		for (int index = 0; index < length; index++) {
@@ -279,6 +331,9 @@ public class InputStreamDataReader implements DataReader {
 
 				bytes[index] = (byte) result;
 
+				// Decrease byte limit
+				byteLimit--;
+				
 			} else {
 
 				// Throw exception
@@ -287,6 +342,9 @@ public class InputStreamDataReader implements DataReader {
 			}
 
 		}
+		
+		// Increase byte received
+		byteReceived += length;
 
 		return bytes;
 

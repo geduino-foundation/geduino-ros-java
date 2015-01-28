@@ -11,13 +11,13 @@ import org.geduino.ros.core.api.model.Direction;
 import org.geduino.ros.core.api.model.PublisherConnectionData;
 import org.geduino.ros.core.api.model.Transport;
 import org.geduino.ros.core.messages.exception.RosMessageSerializationException;
-import org.geduino.ros.core.messages.model.DataWriter;
 import org.geduino.ros.core.messages.model.Message;
 import org.geduino.ros.core.messages.model.MessageDetails;
 import org.geduino.ros.core.messages.model.MessageWriter;
 import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.core.transport.model.PublisherConnection;
 import org.geduino.ros.tcpros.TcpRosConnection;
+import org.geduino.ros.tcpros.TcpRosMessageWriter;
 import org.geduino.ros.tcpros.exception.TcpRosException;
 import org.geduino.ros.tcpros.exception.TcpRosHandshakeException;
 import org.geduino.ros.tcpros.model.ConnectionHeader;
@@ -30,6 +30,8 @@ public class TcpRosServerPublisherConnection<M extends Message> extends
 
 	private final GlobalName topic;
 	private final MessageDetails<M> messageDetails;
+
+	private TcpRosMessageWriter<M> tcpRosMessageWriter;
 
 	public TcpRosServerPublisherConnection(GlobalName callerId,
 			GlobalName topic, MessageDetails<M> messageDetails, Socket socket)
@@ -161,7 +163,7 @@ public class TcpRosServerPublisherConnection<M extends Message> extends
 		// Get publisher connection data
 		String connectionId = getConnectionId();
 		int byteSent = getByteSent();
-		int numSent = getNumSent();
+		int numSent = (tcpRosMessageWriter == null) ? 0 : tcpRosMessageWriter.getNumSent();
 		boolean connected = isConnected();
 
 		// Create publisher connection data
@@ -173,26 +175,16 @@ public class TcpRosServerPublisherConnection<M extends Message> extends
 	}
 
 	@Override
-	public MessageWriter<M> getMessageWriter() {
+	public MessageWriter<M> getMessageWriter() throws IOException {
 
-		return new MessageWriter<M>() {
+		if (tcpRosMessageWriter == null) {
 
-			@Override
-			public void write(M message) throws IOException,
-					RosMessageSerializationException {
+			// Create message writer
+			tcpRosMessageWriter = new TcpRosMessageWriter<M>(getDataWriter());
 
-				// Get data writer
-				DataWriter dataWriter = getDataWriter();
+		}
 
-				// Write message length
-				dataWriter.writeUInt32(message.getLength());
-
-				// Serialize message
-				message.serialize(dataWriter);
-
-			}
-
-		};
+		return tcpRosMessageWriter;
 
 	}
 
