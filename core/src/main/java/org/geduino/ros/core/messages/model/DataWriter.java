@@ -43,10 +43,10 @@ public interface DataWriter {
 	void writeString(String string) throws IOException,
 			RosMessageSerializationException;
 
-	void writeTime(long time) throws IOException,
+	void writeTime(Time time) throws IOException,
 			RosMessageSerializationException;
 
-	void writeDuration(long duration) throws IOException,
+	void writeDuration(Duration duration) throws IOException,
 			RosMessageSerializationException;
 
 }

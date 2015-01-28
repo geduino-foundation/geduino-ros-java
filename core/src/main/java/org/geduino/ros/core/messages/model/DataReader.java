@@ -33,8 +33,8 @@ public interface DataReader {
 	String readString(int length) throws IOException,
 			RosMessageSerializationException;
 
-	long readTime() throws IOException, RosMessageSerializationException;
+	Time readTime() throws IOException, RosMessageSerializationException;
 
-	long readDuration() throws IOException, RosMessageSerializationException;
-
+	Duration readDuration() throws IOException, RosMessageSerializationException;
+	
 }

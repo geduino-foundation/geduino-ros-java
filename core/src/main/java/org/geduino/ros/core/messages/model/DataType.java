@@ -18,8 +18,8 @@ public enum DataType {
 	FLOAT32(4, float.class), 
 	FLOAT64(8, double.class), 
 	STRING(1, String.class), 
-	TIME(8, long.class), 
-	DURATION(8, long.class);
+	TIME(8, Time.class), 
+	DURATION(8, Duration.class);
 
 	private final int length;
 	private final Class<?> javaClass;
