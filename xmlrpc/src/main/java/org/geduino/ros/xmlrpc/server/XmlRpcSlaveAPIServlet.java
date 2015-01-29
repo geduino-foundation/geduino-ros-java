@@ -305,6 +305,14 @@ public class XmlRpcSlaveAPIServlet {
 		LOGGER.trace("paramUpdate request from callerId: " + callerId + " ...");
 
 		try {
+			
+			// Check if parameter key ends with separator (this should not happen but... happens!)
+			if (parameterKey.length() > 1 && parameterKey.endsWith("/")) {
+				
+				// Remove last separator from parameter key
+				parameterKey = parameterKey.substring(0, parameterKey.length() - 1);
+			
+			}
 
 			// Param update
 			slaveAPI.paramUpdate((GlobalName) Name.parseName(callerId),
