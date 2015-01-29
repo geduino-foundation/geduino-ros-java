@@ -72,11 +72,11 @@ public interface ParameterServerAPI {
 	 *            ROS caller ID
 	 * @param key
 	 *            Parameter name to search for.
-	 * @return a set of found keys
+	 * @return found parameter
 	 * @throws RosApiException
 	 *             if an error occurs with api
 	 */
-	Set<GlobalName> searchParam(GlobalName callerId, String key)
+	GlobalName searchParam(GlobalName callerId, String key)
 			throws RosApiException;
 
 	/**
