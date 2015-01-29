@@ -78,6 +78,10 @@ public class TcpRosMessageReader<M extends Message> implements MessageReader<M> 
 
 		} finally {
 
+			// Read unread but expected byte to try do not create error in next
+			// reading
+			inputStreamDataReader.readUntilEndOfByteLimit();
+
 			// Reset byte limit
 			inputStreamDataReader.resetByteLimit();
 

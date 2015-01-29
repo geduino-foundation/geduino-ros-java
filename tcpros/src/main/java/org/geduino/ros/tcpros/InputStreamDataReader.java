@@ -310,6 +310,23 @@ public class InputStreamDataReader implements DataReader {
 	public int getByteLimit() {
 		return byteLimit;
 	}
+	
+	public byte[] readUntilEndOfByteLimit() throws IOException {
+
+		if (byteLimit > 0) {
+
+			// Read bytes
+			byte[] bytes = read(byteLimit);
+
+			return bytes;
+
+		} else {
+
+			return new byte[] {};
+
+		}
+
+	}
 
 	protected byte[] read(int length) throws IOException {
 
