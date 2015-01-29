@@ -36,12 +36,16 @@ public class Publisher<M extends Message> implements
 	private final GlobalName topic;
 	private final MessageDetails<M> messageDetails;
 
+	private final Set<TcpRosServerPublisher<M>> tcpRosServerPublishers;
+
 	private final List<PublisherConnection<M>> publisherConnections;
 
 	public Publisher(GlobalName topic, MessageDetails<M> messageDetails) {
 
 		this.topic = topic;
 		this.messageDetails = messageDetails;
+
+		tcpRosServerPublishers = new HashSet<TcpRosServerPublisher<M>>();
 
 		publisherConnections = new ArrayList<PublisherConnection<M>>();
 
@@ -109,6 +113,54 @@ public class Publisher<M extends Message> implements
 
 	}
 
+	protected void stop() {
+
+		// Log
+		LOGGER.debug("stopping tcp ros servers...");
+
+		for (Iterator<TcpRosServerPublisher<M>> iterator = tcpRosServerPublishers
+				.iterator(); iterator.hasNext();) {
+
+			// Get next tcp ros server publisher
+			TcpRosServerPublisher<M> tcpRosServerPublisher = iterator.next();
+
+			// Log
+			LOGGER.trace("stopping tcp ros server publisher: "
+					+ tcpRosServerPublisher);
+
+			// Stop tcp ros server publisher
+			tcpRosServerPublisher.stop();
+
+		}
+
+		// Log
+		LOGGER.debug("closing publisher connections...");
+
+		for (Iterator<PublisherConnection<M>> iterator = publisherConnections
+				.iterator(); iterator.hasNext();) {
+
+			// Get next publisher connection
+			PublisherConnection<M> publisherConnection = iterator.next();
+
+			// Log
+			LOGGER.trace("closing publisher connection: " + publisherConnection);
+
+			try {
+				
+				// Close connection
+				publisherConnection.close();
+
+			} catch (Exception ex) {
+
+				// Log
+				LOGGER.error("could not close publisher connection", ex);
+
+			}
+			
+		}
+
+	}
+
 	Protocol newConnection(GlobalName nodeName, URI nodeUri,
 			Set<ProtocolType> protocolTypes) throws RosPublisherException {
 
@@ -132,6 +184,9 @@ public class Publisher<M extends Message> implements
 
 				// Start tcp ros server publisher
 				tcpRosServerPublisher.start();
+
+				// Add to tcp ros server publishers
+				tcpRosServerPublishers.add(tcpRosServerPublisher);
 
 				// Get tcp ros server port
 				int port = tcpRosServerPublisher.getEffectivePort();

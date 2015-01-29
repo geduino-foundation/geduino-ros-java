@@ -76,6 +76,8 @@ public abstract class Node {
 
 	protected abstract void paramUpdated(GlobalName parameterName, Object value);
 
+	protected abstract void shutdown();
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

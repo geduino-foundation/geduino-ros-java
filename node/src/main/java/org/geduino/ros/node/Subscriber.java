@@ -100,6 +100,37 @@ public class Subscriber<T extends Message> {
 
 	}
 
+	protected void stop() {
+
+		// Log
+		LOGGER.debug("closing subscriber connections...");
+
+		for (Iterator<SubscriberConnection<T>> iterator = subscriberConnections
+				.iterator(); iterator.hasNext();) {
+
+			// Get next subscriber connection
+			SubscriberConnection<T> subscriberConnection = iterator.next();
+
+			// Log
+			LOGGER.trace("closing subscriber connection: "
+					+ subscriberConnection);
+
+			try {
+
+				// Close connection
+				subscriberConnection.close();
+
+			} catch (Exception ex) {
+
+				// Log
+				LOGGER.error("could not close subscriber connection", ex);
+
+			}
+
+		}
+
+	}
+
 	void updateConnections(GlobalName nodeName, Set<Protocol> protocols) {
 
 		Set<Protocol> connectedProtocols = new HashSet<Protocol>();

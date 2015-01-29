@@ -67,11 +67,17 @@ public class NodeHandle implements SlaveAPI {
 			XmlRpcClientConfigImpl xmlRpcClientConfigImpl = new XmlRpcClientConfigImpl();
 			xmlRpcClientConfigImpl.setServerURL(rosMasterUri.toURL());
 
-			// Create xml rpc client
+			// Create master api client
 			XmlRpcMasterAPIClient xmlRpcMasterAPIClient = new XmlRpcMasterAPIClient();
 			xmlRpcMasterAPIClient.setConfig(xmlRpcClientConfigImpl);
 
 			masterAPIClient = xmlRpcMasterAPIClient;
+
+			// Create parameter server api client
+			XmlRpcParameterServerAPIClient xmlRpcParameterServerAPIClient = new XmlRpcParameterServerAPIClient();
+			xmlRpcParameterServerAPIClient.setConfig(xmlRpcClientConfigImpl);
+
+			parameterServerAPIClient = xmlRpcParameterServerAPIClient;
 
 			// Create slave api server
 			slaveAPIServer = new XmlRpcSlaveAPIServer(this);
@@ -94,7 +100,7 @@ public class NodeHandle implements SlaveAPI {
 	public void start() throws RosNodeException {
 
 		// Log
-		LOGGER.info("starting node: " + node + " ...");
+		LOGGER.info("starting node handle for node: " + node + " ...");
 
 		try {
 
@@ -120,7 +126,8 @@ public class NodeHandle implements SlaveAPI {
 			slaveAPIServer.start();
 
 			// Log
-			LOGGER.info("node: " + node + " is started successfully!");
+			LOGGER.info("node handle for node: " + node
+					+ " is started successfully!");
 
 		} catch (RosApiException ex) {
 
@@ -133,6 +140,121 @@ public class NodeHandle implements SlaveAPI {
 			throw new RosNodeException("could not start node", ex);
 
 		}
+
+	}
+
+	public void stop() throws RosNodeException {
+
+		// Log
+		LOGGER.info("stopping node handle for node: " + node + " ...");
+
+		// Log
+		LOGGER.debug("stopping slave api server...");
+
+		try {
+
+			// Stop slave api server
+			slaveAPIServer.stop();
+
+		} catch (Exception ex) {
+
+			// Throw exception
+			throw new RosNodeException("could not stop node", ex);
+
+		}
+
+		// Log
+		LOGGER.debug("unregistering publishers...");
+
+		for (Iterator<Publisher<?>> iterator = publisherMap.values().iterator(); iterator
+				.hasNext();) {
+
+			// Get next publisher
+			Publisher<?> publisher = iterator.next();
+
+			// Log
+			LOGGER.trace("unregistering publisher for topic: "
+					+ publisher.getTopic().toString() + " ...");
+
+			try {
+
+				// Unregister publisher
+				masterAPIClient.unregisterPublisher(node.getNodeName(),
+						publisher.getTopic(), node.getNodeUri());
+
+			} catch (RosApiException ex) {
+
+				// Throw exception
+				throw new RosNodeException("could not unregister publisher", ex);
+
+			}
+
+			// Stop publisher
+			publisher.stop();
+
+		}
+
+		// Log
+		LOGGER.debug("unregistering subscribers...");
+
+		for (Iterator<Subscriber<?>> iterator = subscriberMap.values()
+				.iterator(); iterator.hasNext();) {
+
+			// Get next subscriber
+			Subscriber<?> subscriber = iterator.next();
+
+			// Log
+			LOGGER.trace("unregistering subscriber for topic: "
+					+ subscriber.getTopic().toString() + " ...");
+
+			try {
+
+				// Unregister subscriber
+				masterAPIClient.unregisterSubscriber(node.getNodeName(),
+						subscriber.getTopic(), node.getNodeUri());
+
+			} catch (RosApiException ex) {
+
+				// Throw exception
+				throw new RosNodeException("could unregister subscriber", ex);
+
+			}
+
+			// Stop subscriber
+			subscriber.stop();
+
+		}
+
+		// Log
+		LOGGER.debug("unsubscribing params...");
+
+		for (Iterator<GlobalName> iterator = subscribebParameterNames
+				.iterator(); iterator.hasNext();) {
+
+			// Get next parameter name
+			GlobalName parameterName = iterator.next();
+
+			// Log
+			LOGGER.trace("unsubscribing parameter: " + parameterName.toString()
+					+ " ...");
+
+			try {
+
+				// Unsubscribing parameter
+				parameterServerAPIClient.unsubscribeParam(node.getNodeName(),
+						node.getNodeUri(), parameterName);
+
+			} catch (RosApiException ex) {
+
+				// Throw exception
+				throw new RosNodeException("could unregister param", ex);
+
+			}
+
+		}
+
+		// Log
+		LOGGER.debug("node handle stopped");
 
 	}
 
@@ -465,7 +587,12 @@ public class NodeHandle implements SlaveAPI {
 	@Override
 	public void shutdown(GlobalName callerId, String message)
 			throws RosApiException {
-		// TODO Auto-generated method stub
+		
+		// Log
+		LOGGER.debug("shutdown request from: " + callerId.toString() + " with message: " + message);
+		
+		// Invoke shutdown method on node
+		node.shutdown();
 
 	}
 
