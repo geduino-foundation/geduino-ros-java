@@ -1,84 +1,50 @@
 package org.geduino.ros.core.messages.model;
 
-import java.io.Serializable;
-import java.util.Date;
-
-public class Time implements Serializable {
+public class Time extends RosTime {
 
 	private static final long serialVersionUID = 1L;
 
-	private final long time;
+	public static Time now() {
 
-	public static final Time ZERO = new Time(0);
-	
+		// Get now
+		Time now = new Time();
+
+		return now;
+
+	}
+
 	public Time() {
-		this(System.currentTimeMillis());
+		super(System.currentTimeMillis());
 	}
 
-	public Time(long time) {
-		this.time = time;
+	public Time(long seconds, long nanos) {
+		super(seconds, nanos);
 	}
-	
+
+	public Time(long millis) {
+		super(millis);
+	}
+
 	public Time(Time time) {
-		this.time = time.time;
-	}
-	
-	public Time(Date date) {
-		this.time = date.getTime();
+		super(time);
 	}
 
-	public long getTime() {
-		return time;
-	}
-
-	public Date toDate() {
-		
-		// Get date
-		Date date = new Date(time);
-		
-		return date;
-		
-	}
-	
 	public Time add(Duration duration) {
 
 		// Get time
-		Time time = new Time(this.time + duration.getDuration());
+		Time add = new Time(add(duration));
 
-		return time;
+		return add;
 
 	}
 
 	public Time subtract(Duration duration) {
 
 		// Get time
-		Time time = new Time(this.time - duration.getDuration());
+		Time add = new Time(subtract(duration));
 
-		return time;
+		return add;
 
-	}
-
-	public Duration ellapsedFrom(Time from) {
-
-		// Get duration
-		Duration duration = new Duration(time - from.time);
-
-		return duration;
-
-	}
-
-	public Duration ellapsedTo(Time to) {
-
-		// Get duration
-		Duration duration = new Duration(to.time - time);
-
-		return duration;
-
-	}
-
-	@Override
-	public String toString() {
-		return "Time [time=" + time + "]";
 	}
 
 }

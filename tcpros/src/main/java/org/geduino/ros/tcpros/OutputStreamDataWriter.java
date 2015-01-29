@@ -52,11 +52,13 @@ public class OutputStreamDataWriter implements DataWriter {
 	public void writeDuration(Duration duration) throws IOException,
 			RosMessageSerializationException {
 
-		// Get duration long
-		long durationLong = duration.getDuration();
+		// Get seconds and nanos
+		int seconds = (int) duration.getSeconds();
+		int nanos = (int) duration.getNanos();
 
-		// Write duration as int32
-		writeInt32((int) durationLong);
+		// Write seconds and nanos as int32
+		writeInt32(seconds);
+		writeInt32(nanos);
 
 	}
 
@@ -181,11 +183,13 @@ public class OutputStreamDataWriter implements DataWriter {
 	public void writeTime(Time time) throws IOException,
 			RosMessageSerializationException {
 
-		// Get duration time
-		long durationTime = time.getTime();
+		// Get seconds and nanos
+		long seconds = time.getSeconds();
+		long nanos = time.getNanos();
 
-		// Write duration as uint32
-		writeUInt32(durationTime);
+		// Write seconds and nanos as int32
+		writeUInt32(seconds);
+		writeUInt32(nanos);
 
 	}
 

@@ -26,7 +26,7 @@ class InitValue {
 		INIT_VALUE.put(DataType.FLOAT32, JExpr.lit(0F));
 		INIT_VALUE.put(DataType.FLOAT64, JExpr.lit(0D));
 		INIT_VALUE.put(DataType.STRING, JExpr.lit(""));
-		INIT_VALUE.put(DataType.TIME, JExpr.direct("org.geduino.ros.core.messages.model.Time.ZERO"));
+		INIT_VALUE.put(DataType.TIME, JExpr.direct("org.geduino.ros.core.messages.model.Time.now()"));
 		INIT_VALUE.put(DataType.DURATION, JExpr.direct("org.geduino.ros.core.messages.model.Duration.ZERO"));
 	}
 

@@ -13,23 +13,24 @@ import org.geduino.ros.core.util.BytesUtil;
 
 public class InputStreamDataReader implements DataReader {
 
-	private static final Logger LOGGER = Logger.getLogger(InputStreamDataReader.class);
-	
+	private static final Logger LOGGER = Logger
+			.getLogger(InputStreamDataReader.class);
+
 	private final InputStream inputStream;
-	
+
 	private int byteReceived;
 	private int byteLimit;
-	
+
 	public InputStreamDataReader(InputStream inputStream) {
-		
+
 		this.inputStream = inputStream;
-		
+
 		// Set byte received to zero
 		byteReceived = 0;
-		
+
 		// Set byte limit to max value
 		byteLimit = Integer.MAX_VALUE;
-		
+
 	}
 
 	@Override
@@ -50,11 +51,12 @@ public class InputStreamDataReader implements DataReader {
 	public Duration readDuration() throws IOException,
 			RosMessageSerializationException {
 
-		// Read duration as int32
-		int durationInt = readInt32();
+		// Read seconds and nanos as int32
+		long seconds = readInt32();
+		long nanos = readInt32();
 
 		// Get duration
-		Duration duration = new Duration(durationInt);
+		Duration duration = new Duration(seconds, nanos);
 
 		return duration;
 
@@ -216,11 +218,12 @@ public class InputStreamDataReader implements DataReader {
 	@Override
 	public Time readTime() throws IOException, RosMessageSerializationException {
 
-		// Read duration as uint32
-		long timeLong = readUInt32();
+		// Read seconds and nanos as uint32
+		long seconds = readUInt32();
+		long nanos = readUInt32();
 
 		// Get time
-		Time time = new Time(timeLong);
+		Time time = new Time(seconds, nanos);
 
 		return time;
 
@@ -291,7 +294,7 @@ public class InputStreamDataReader implements DataReader {
 		return intValue;
 
 	}
-	
+
 	public int getByteReceived() {
 		return byteReceived;
 	}
@@ -299,11 +302,11 @@ public class InputStreamDataReader implements DataReader {
 	public void resetByteLimit() {
 		byteLimit = Integer.MAX_VALUE;
 	}
-	
+
 	public void resetByteLimit(int byteLimit) {
 		this.byteLimit = byteLimit;
 	}
-	
+
 	public int getByteLimit() {
 		return byteLimit;
 	}
@@ -311,15 +314,16 @@ public class InputStreamDataReader implements DataReader {
 	protected byte[] read(int length) throws IOException {
 
 		if (length > byteLimit) {
-			
+
 			// Throw exception
-			throw new IOException("cannot read: " + length + " bytes, limit is: " + byteLimit);
-			
+			throw new IOException("cannot read: " + length
+					+ " bytes, limit is: " + byteLimit);
+
 		}
-		
+
 		// Log
 		LOGGER.trace("reading " + length + " bytes...");
-					
+
 		byte[] bytes = new byte[length];
 
 		for (int index = 0; index < length; index++) {
@@ -333,7 +337,7 @@ public class InputStreamDataReader implements DataReader {
 
 				// Decrease byte limit
 				byteLimit--;
-				
+
 			} else {
 
 				// Throw exception
@@ -342,7 +346,7 @@ public class InputStreamDataReader implements DataReader {
 			}
 
 		}
-		
+
 		// Increase byte received
 		byteReceived += length;
 

@@ -1,59 +1,50 @@
 package org.geduino.ros.core.messages.model;
 
-import java.io.Serializable;
-
-public class Duration implements Serializable {
+public class Duration extends RosTime {
 
 	private static final long serialVersionUID = 1L;
 
-	private final long duration;
-
 	public static final Duration ZERO = new Duration();
-	
+
 	public Duration() {
-		this(0);
+		super(0, 0);
 	}
 
-	public Duration(Time from, Time to) {
-		this(to.getTime() - from.getTime());
-	}
-	
-	public Duration(long duration) {
-		this.duration = duration;
+	public Duration(long seconds, long nanos) {
+		super(seconds, nanos);
 	}
 
-	public long getDuration() {
-		return duration;
+	public Duration(long millis) {
+		super(millis);
+	}
+
+	public Duration(Duration duration) {
+		super(duration);
 	}
 
 	public void sleep() throws InterruptedException {
 
 		// Sleep
-		Thread.sleep(duration);
+		Thread.sleep(getMillis(), (int) getNanosForMillis());
 
 	}
 
 	public Duration add(Duration duration) {
 
 		// Get duration
-		Duration duration2 = new Duration(this.duration + duration.duration);
+		Duration sum = new Duration(add(duration));
 
-		return duration2;
+		return sum;
 
 	}
 
 	public Duration subtract(Duration duration) {
 
 		// Get duration
-		Duration duration2 = new Duration(this.duration - duration.duration);
+		Duration sub = new Duration(subtract(duration));
 
-		return duration2;
+		return sub;
 
-	}
-
-	@Override
-	public String toString() {
-		return "Duration [duration=" + duration + "]";
 	}
 
 }
