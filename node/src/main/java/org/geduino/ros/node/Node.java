@@ -72,7 +72,9 @@ public abstract class Node {
 
 	}
 
-	public abstract void run() throws RosException;
+	protected abstract void run() throws RosException;
+
+	protected abstract void paramUpdated(GlobalName parameterName, Object value);
 
 	@Override
 	public int hashCode() {

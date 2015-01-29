@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.geduino.ros.core.api.MasterAPI;
+import org.geduino.ros.core.api.ParameterServerAPI;
 import org.geduino.ros.core.api.SlaveAPI;
 import org.geduino.ros.core.api.exception.RosApiException;
 import org.geduino.ros.core.api.model.BusInfo;
@@ -25,6 +26,7 @@ import org.geduino.ros.core.naming.model.MessageName;
 import org.geduino.ros.node.exception.RosNodeException;
 import org.geduino.ros.node.exception.RosPublisherException;
 import org.geduino.ros.xmlrpc.client.XmlRpcMasterAPIClient;
+import org.geduino.ros.xmlrpc.client.XmlRpcParameterServerAPIClient;
 import org.geduino.ros.xmlrpc.client.XmlRpcSlaveAPIClient;
 import org.geduino.ros.xmlrpc.server.XmlRpcSlaveAPIServer;
 
@@ -39,14 +41,20 @@ public class NodeHandle implements SlaveAPI {
 		SUPPORTED_PROTOCOL_TYPES.add(ProtocolType.TCPROS);
 	}
 
+	public static final String ROS_DISTRO_PARAM_NAME = "/rosdistro";
+
+	public static final String ROS_VERSION_PARAM_NAME = "/rosversion";
+
 	private final Node node;
 	private final URI rosMasterUri;
 
 	private final MasterAPI masterAPIClient;
+	private final ParameterServerAPI parameterServerAPIClient;
 	private final XmlRpcSlaveAPIServer slaveAPIServer;
 
 	private final Map<GlobalName, Publisher<?>> publisherMap;
 	private final Map<GlobalName, Subscriber<?>> subscriberMap;
+	private final Set<GlobalName> subscribebParameterNames;
 
 	public NodeHandle(Node node, URI rosMasterUri) throws RosNodeException {
 
@@ -79,6 +87,7 @@ public class NodeHandle implements SlaveAPI {
 
 		publisherMap = new HashMap<GlobalName, Publisher<?>>();
 		subscriberMap = new HashMap<GlobalName, Subscriber<?>>();
+		subscribebParameterNames = new HashSet<GlobalName>();
 
 	}
 
@@ -95,6 +104,14 @@ public class NodeHandle implements SlaveAPI {
 
 			// Connect to master
 			masterAPIClient.getUri(node.getNodeName());
+
+			// Get ros distro and version
+			String rosDistro = (String) getParam(ROS_DISTRO_PARAM_NAME, "N/A");
+			String rosVersion = (String) getParam(ROS_VERSION_PARAM_NAME, "N/A");
+
+			// Log
+			LOGGER.debug("master is running ros distro: " + rosDistro.trim()
+					+ ", version: " + rosVersion.trim());
 
 			// Log
 			LOGGER.debug("starting slave api server...");
@@ -176,6 +193,76 @@ public class NodeHandle implements SlaveAPI {
 					+ subscriber, ex);
 
 		}
+
+	}
+
+	public Object getParam(String key, Object defaultValue)
+			throws RosApiException {
+
+		// Get parameter resolved name
+		GlobalName parameterName = node.getResolvedName(key);
+
+		if (parameterServerAPIClient
+				.hasParam(node.getNodeName(), parameterName)) {
+
+			// Get param value
+			Object value = parameterServerAPIClient.getParam(
+					node.getNodeName(), parameterName);
+
+			if (defaultValue.getClass().isAssignableFrom(value.getClass())) {
+
+				return value;
+
+			} else {
+
+				// Log
+				LOGGER.warn("parameter: " + parameterName
+						+ " expected value class is: "
+						+ defaultValue.getClass() + " but was: "
+						+ value.getClass());
+
+				return defaultValue;
+
+			}
+
+		} else {
+
+			// Set param value
+			parameterServerAPIClient.setParam(node.getNodeName(),
+					parameterName, defaultValue);
+
+			// Return default value
+			return defaultValue;
+
+		}
+
+	}
+
+	public void setParam(String key, Object value) throws RosApiException {
+
+		// Get parameter resolved name
+		GlobalName parameterName = node.getResolvedName(key);
+
+		// Set param
+		parameterServerAPIClient.setParam(node.getNodeName(), parameterName,
+				value);
+
+	}
+
+	public void subscribeParam(String key) throws RosApiException {
+
+		// Get parameter resolved name
+		GlobalName parameterName = node.getResolvedName(key);
+
+		// Log
+		LOGGER.trace("subscribing param: " + parameterName.toString() + " ...");
+
+		// Subscribe param
+		parameterServerAPIClient.subscribeParam(node.getNodeName(),
+				node.getNodeUri(), parameterName);
+
+		// Add to subscribed parameter names
+		subscribebParameterNames.add(parameterName);
 
 	}
 
@@ -319,7 +406,14 @@ public class NodeHandle implements SlaveAPI {
 	@Override
 	public void paramUpdate(GlobalName callerId, GlobalName parameterKey,
 			Object parameterValue) throws RosApiException {
-		// TODO Auto-generated method stub
+
+		// Log
+		LOGGER.trace("parameter: " + parameterKey.toString() + " updated by: "
+				+ callerId);
+
+		// Invoke handke method on node
+		node.paramUpdated(parameterKey, parameterValue);
+
 	}
 
 	@Override
