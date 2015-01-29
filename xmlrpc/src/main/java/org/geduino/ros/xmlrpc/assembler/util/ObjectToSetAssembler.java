@@ -6,7 +6,9 @@ import java.util.Set;
 
 import org.geduino.ros.core.api.model.Protocol;
 import org.geduino.ros.core.api.model.ProtocolType;
+import org.geduino.ros.core.naming.model.GlobalName;
 import org.geduino.ros.xmlrpc.assembler.util.impl.CastObjectToEntryAssembler;
+import org.geduino.ros.xmlrpc.assembler.util.impl.ObjectToGlobalNameEntryAssembler;
 import org.geduino.ros.xmlrpc.assembler.util.impl.ObjectToProtocolTypeEntryAssembler;
 import org.geduino.ros.xmlrpc.assembler.util.impl.URIObjectToEntryAssembler;
 import org.geduino.ros.xmlrpc.exception.InvalidObjectTypeException;
@@ -23,6 +25,9 @@ public class ObjectToSetAssembler<E> {
 
 	public static final ObjectToSetAssembler<URI> URI = new ObjectToSetAssembler<URI>(
 			new URIObjectToEntryAssembler());
+
+	public static final ObjectToSetAssembler<GlobalName> GLOBAL_NAME = new ObjectToSetAssembler<GlobalName>(
+			new ObjectToGlobalNameEntryAssembler());
 
 	public ObjectToSetAssembler(ObjectToEntryAssembler<E> objectToEntryAssembler) {
 		this.objectToEntryAssembler = objectToEntryAssembler;
