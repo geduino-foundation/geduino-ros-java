@@ -92,4 +92,9 @@ public class TcpRosServer<C extends TcpRosConnection> {
 
 	}
 
+	@Override
+	public String toString() {
+		return "TcpRosServer [effectivePort=" + effectivePort + "]";
+	}
+
 }

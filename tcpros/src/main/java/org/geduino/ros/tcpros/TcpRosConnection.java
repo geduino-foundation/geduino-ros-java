@@ -241,4 +241,10 @@ public abstract class TcpRosConnection extends SocketConnection {
 
 	}
 
+	@Override
+	public String toString() {
+		return "TcpRosConnection [callerId=" + callerId + ", destinationId="
+				+ destinationId + "]";
+	}
+
 }
