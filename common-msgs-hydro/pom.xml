@@ -37,6 +37,7 @@
 									<arg
 										line="-classpath ${org.geduino.ros:messages:jar}:${org.geduino.ros:core:jar}:${com.sun.codemodel:codemodel:jar}:${log4j:log4j:jar} org.geduino.ros.messages.generator.Main src/main/resources/org/geduino/ros/common/msgs/hydro ${project.build.directory}/src org.geduino.ros.common.msgs.hydro" />
 								</exec>
+								<property name="build.compiler" value="extJavac"/>
 								<property name="compile_classpath" refid="maven.compile.classpath"/>
 								<javac srcdir="${project.build.directory}/src" destdir="${project.build.directory}/classes"
 									classpath="${compile_classpath}" source="1.6" includeantruntime="false" />
