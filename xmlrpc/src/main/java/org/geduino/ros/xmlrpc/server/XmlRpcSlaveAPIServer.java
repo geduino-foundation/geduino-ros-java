@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.servlet.GenericServlet;
 
 import org.apache.log4j.Logger;
-import org.apache.xmlrpc.server.RequestProcessorFactoryFactory;
 import org.apache.xmlrpc.webserver.XmlRpcServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
@@ -65,8 +64,9 @@ public class XmlRpcSlaveAPIServer {
 		XmlRpcSlaveAPIServlet xmlRpcSlaveAPIServlet = new XmlRpcSlaveAPIServlet(
 				slaveAPI);
 
-		// Create request processor factory factory for xml rpc slave api servlet
-		RequestProcessorFactoryFactory.InstancesProcessorFactoryFactory requestProcessorFactoryFactory = new RequestProcessorFactoryFactory.InstancesProcessorFactoryFactory();
+		// Create request processor factory factory for xml rpc slave api
+		// servlet
+		InstancesProcessorFactoryFactory requestProcessorFactoryFactory = new InstancesProcessorFactoryFactory();
 		requestProcessorFactoryFactory.put(XmlRpcSlaveAPIServlet.class,
 				xmlRpcSlaveAPIServlet);
 
