@@ -16,6 +16,7 @@ import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JExpression;
 import com.sun.codemodel.JFieldVar;
 import com.sun.codemodel.JForLoop;
 import com.sun.codemodel.JMethod;
@@ -83,6 +84,14 @@ class DeserializeMethodGenerator {
 			jForLoop.update(indexJVar.incr());
 			JAssignmentTarget jAssignmentTarget = jFieldVar
 					.component(indexJVar);
+
+			if (!(fieldType instanceof PrimitiveFieldType)) {
+
+				// Add constructor for non primitive array element
+				jForLoop.body().assign(jAssignmentTarget,
+						JExpr._new(jFieldVar.type().elementType()));
+
+			}
 
 			// Generate read statement
 			generateReadStatement(fieldType, jAssignmentTarget, jForLoop.body());
