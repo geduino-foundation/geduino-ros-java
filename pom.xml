@@ -133,6 +133,8 @@
 		<module>messages</module>
 		<module>node</module>
 		<module>common-msgs-hydro</module>
+		<module>common-msgs-indigo</module>
+		<module>common-msgs-jade</module>
 	</modules>
 
 	<!-- ############# Dependencies section ############# -->
